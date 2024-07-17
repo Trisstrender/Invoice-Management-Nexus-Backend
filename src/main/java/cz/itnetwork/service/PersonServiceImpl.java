@@ -1,34 +1,13 @@
-/*  _____ _______         _                      _
- * |_   _|__   __|       | |                    | |
- *   | |    | |_ __   ___| |___      _____  _ __| | __  ___ ____
- *   | |    | | '_ \ / _ \ __\ \ /\ / / _ \| '__| |/ / / __|_  /
- *  _| |_   | | | | |  __/ |_ \ V  V / (_) | |  |   < | (__ / /
- * |_____|  |_|_| |_|\___|\__| \_/\_/ \___/|_|  |_|\_(_)___/___|
- *                                _
- *              ___ ___ ___ _____|_|_ _ _____
- *             | . |  _| -_|     | | | |     |  LICENCE
- *             |  _|_| |___|_|_|_|_|___|_|_|_|
- *             |_|
- *
- *   PROGRAMOVÁNÍ  <>  DESIGN  <>  PRÁCE/PODNIKÁNÍ  <>  HW A SW
- *
- * Tento zdrojový kód je součástí výukových seriálů na
- * IT sociální síti WWW.ITNETWORK.CZ
- *
- * Kód spadá pod licenci prémiového obsahu a vznikl díky podpoře
- * našich členů. Je určen pouze pro osobní užití a nesmí být šířen.
- * Více informací na http://www.itnetwork.cz/licence
- */
 package cz.itnetwork.service;
 
 import cz.itnetwork.dto.PersonDTO;
+import cz.itnetwork.dto.InvoiceDTO;
 import cz.itnetwork.dto.mapper.PersonMapper;
 import cz.itnetwork.entity.PersonEntity;
 import cz.itnetwork.entity.repository.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -74,18 +53,34 @@ public class PersonServiceImpl implements PersonService {
         return personMapper.toDTO(personEntity);
     }
 
-    // region: Private methods
-    /**
-     * <p>Attempts to fetch a person.</p>
-     * <p>In case a person with the passed [id] doesn't exist a [{@link org.webjars.NotFoundException}] is thrown.</p>
-     *
-     * @param id Person to fetch
-     * @return Fetched entity
-     * @throws org.webjars.NotFoundException In case a person with the passed [id] isn't found
-     */
+    @Autowired
+    private InvoiceService invoiceService;
+
+    @Override
+    public PersonDTO updatePerson(long id, PersonDTO personDTO) {
+        PersonEntity existingPerson = fetchPersonById(id);
+        existingPerson.setHidden(true);
+        personRepository.save(existingPerson);
+
+        PersonEntity newPerson = personMapper.toEntity(personDTO);
+        newPerson.setId(0); // Ensure a new entity is created
+        newPerson = personRepository.save(newPerson);
+
+        return personMapper.toDTO(newPerson);
+    }
+
+    @Override
+    public List<InvoiceDTO> getPersonSales(String identificationNumber) {
+        return invoiceService.getPersonSales(identificationNumber);
+    }
+
+    @Override
+    public List<InvoiceDTO> getPersonPurchases(String identificationNumber) {
+        return invoiceService.getPersonPurchases(identificationNumber);
+    }
+
     private PersonEntity fetchPersonById(long id) {
         return personRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Person with id " + id + " wasn't found in the database."));
     }
-    // endregion
 }
