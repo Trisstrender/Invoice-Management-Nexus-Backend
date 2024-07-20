@@ -3,12 +3,14 @@ package cz.itnetwork.service;
 import cz.itnetwork.dto.PersonDTO;
 import cz.itnetwork.dto.InvoiceDTO;
 import cz.itnetwork.dto.mapper.PersonMapper;
+import cz.itnetwork.entity.InvoiceEntity;
 import cz.itnetwork.entity.PersonEntity;
 import cz.itnetwork.entity.repository.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
-import java.util.List;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,6 +22,10 @@ public class PersonServiceImpl implements PersonService {
     @Autowired
     private PersonRepository personRepository;
 
+    @Autowired
+    private InvoiceService invoiceService;
+
+    @Override
     public PersonDTO addPerson(PersonDTO personDTO) {
         PersonEntity entity = personMapper.toEntity(personDTO);
         entity = personRepository.save(entity);
@@ -43,7 +49,7 @@ public class PersonServiceImpl implements PersonService {
     public List<PersonDTO> getAll() {
         return personRepository.findByHidden(false)
                 .stream()
-                .map(i -> personMapper.toDTO(i))
+                .map(personMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
@@ -52,9 +58,6 @@ public class PersonServiceImpl implements PersonService {
         PersonEntity personEntity = fetchPersonById(id);
         return personMapper.toDTO(personEntity);
     }
-
-    @Autowired
-    private InvoiceService invoiceService;
 
     @Override
     public PersonDTO updatePerson(long id, PersonDTO personDTO) {
@@ -77,6 +80,20 @@ public class PersonServiceImpl implements PersonService {
     @Override
     public List<InvoiceDTO> getPersonPurchases(String identificationNumber) {
         return invoiceService.getPersonPurchases(identificationNumber);
+    }
+
+    @Override
+    public List<Map<String, Object>> getPersonStatistics() {
+        return personRepository.findAll().stream()
+                .map(person -> {
+                    long revenue = person.getSales().stream().mapToLong(InvoiceEntity::getPrice).sum();
+                    Map<String, Object> statistics = new HashMap<>();
+                    statistics.put("personId", person.getId());
+                    statistics.put("personName", person.getName());
+                    statistics.put("revenue", revenue);
+                    return statistics;
+                })
+                .collect(Collectors.toList());
     }
 
     private PersonEntity fetchPersonById(long id) {

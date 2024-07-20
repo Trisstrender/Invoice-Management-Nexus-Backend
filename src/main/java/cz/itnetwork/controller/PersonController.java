@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -48,5 +49,10 @@ public class PersonController {
     @GetMapping("/identification/{identificationNumber}/purchases")
     public List<InvoiceDTO> getPersonPurchases(@PathVariable String identificationNumber) {
         return personService.getPersonPurchases(identificationNumber);
+    }
+
+    @GetMapping("/persons/statistics")
+    public List<Map<String, Object>> getPersonStatistics() {
+        return personService.getPersonStatistics();
     }
 }

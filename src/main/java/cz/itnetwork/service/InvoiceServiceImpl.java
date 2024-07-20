@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -83,9 +84,25 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Override
     public Map<String, Object> getInvoiceStatistics() {
-        // Implement statistics calculation
-        // Add logic to calculate currentYearSum, allTimeSum, and invoicesCount
-        return new HashMap<>();
+        long currentYear = LocalDate.now().getYear();
+
+        long currentYearSum = invoiceRepository.findAll().stream()
+                .filter(invoice -> invoice.getIssued().getYear() == currentYear)
+                .mapToLong(InvoiceEntity::getPrice)
+                .sum();
+
+        long allTimeSum = invoiceRepository.findAll().stream()
+                .mapToLong(InvoiceEntity::getPrice)
+                .sum();
+
+        long invoicesCount = invoiceRepository.count();
+
+        Map<String, Object> statistics = new HashMap<>();
+        statistics.put("currentYearSum", currentYearSum);
+        statistics.put("allTimeSum", allTimeSum);
+        statistics.put("invoicesCount", invoicesCount);
+
+        return statistics;
     }
 
     @Override
