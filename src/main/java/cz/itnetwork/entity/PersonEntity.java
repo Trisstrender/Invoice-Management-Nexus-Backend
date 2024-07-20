@@ -53,6 +53,7 @@ public class PersonEntity {
 
     private String note;
 
+    @Column(nullable = false)
     private boolean hidden = false;
 
     @OneToMany(mappedBy = "buyer")
