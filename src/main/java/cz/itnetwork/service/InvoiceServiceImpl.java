@@ -4,6 +4,8 @@ import cz.itnetwork.dto.InvoiceDTO;
 import cz.itnetwork.dto.mapper.InvoiceMapper;
 import cz.itnetwork.entity.InvoiceEntity;
 import cz.itnetwork.entity.repository.InvoiceRepository;
+import cz.itnetwork.entity.repository.PersonRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
@@ -18,11 +20,21 @@ public class InvoiceServiceImpl implements InvoiceService {
     private InvoiceRepository invoiceRepository;
 
     @Autowired
+    private PersonRepository personRepository;
+
+    @Autowired
     private InvoiceMapper invoiceMapper;
 
     @Override
     public InvoiceDTO createInvoice(InvoiceDTO invoiceDTO) {
         InvoiceEntity entity = invoiceMapper.toEntity(invoiceDTO);
+
+        // Fetch buyer and seller from database
+        entity.setBuyer(personRepository.findById(invoiceDTO.getBuyer().getId())
+                .orElseThrow(() -> new EntityNotFoundException("Buyer not found")));
+        entity.setSeller(personRepository.findById(invoiceDTO.getSeller().getId())
+                .orElseThrow(() -> new EntityNotFoundException("Seller not found")));
+
         entity = invoiceRepository.save(entity);
         return invoiceMapper.toDTO(entity);
     }
@@ -44,10 +56,21 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     public InvoiceDTO updateInvoice(long id, InvoiceDTO invoiceDTO) {
         InvoiceEntity existingInvoice = invoiceRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Invoice not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Invoice not found"));
 
         // Update the existing invoice with new data
         invoiceMapper.updateEntityFromDto(invoiceDTO, existingInvoice);
+
+        // Update buyer and seller if they've changed
+        if (invoiceDTO.getBuyer() != null && invoiceDTO.getBuyer().getId() != null) {
+            existingInvoice.setBuyer(personRepository.findById(invoiceDTO.getBuyer().getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Buyer not found")));
+        }
+        if (invoiceDTO.getSeller() != null && invoiceDTO.getSeller().getId() != null) {
+            existingInvoice.setSeller(personRepository.findById(invoiceDTO.getSeller().getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Seller not found")));
+        }
+
         existingInvoice = invoiceRepository.save(existingInvoice);
 
         return invoiceMapper.toDTO(existingInvoice);

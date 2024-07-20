@@ -17,7 +17,7 @@ public class PersonController {
 
     @PostMapping("/persons")
     public PersonDTO addPerson(@RequestBody PersonDTO personDTO) {
-        return  personService.addPerson(personDTO);
+        return personService.addPerson(personDTO);
     }
 
     @GetMapping("/persons")
@@ -50,4 +50,3 @@ public class PersonController {
         return personService.getPersonPurchases(identificationNumber);
     }
 }
-

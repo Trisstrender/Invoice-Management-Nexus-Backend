@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity(name = "person")
 @Getter
 @Setter
@@ -53,4 +55,9 @@ public class PersonEntity {
 
     private boolean hidden = false;
 
+    @OneToMany(mappedBy = "buyer")
+    private List<InvoiceEntity> purchases;
+
+    @OneToMany(mappedBy = "seller")
+    private List<InvoiceEntity> sales;
 }

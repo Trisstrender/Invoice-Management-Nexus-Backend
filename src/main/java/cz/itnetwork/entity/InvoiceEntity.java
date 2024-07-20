@@ -3,44 +3,37 @@ package cz.itnetwork.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import java.util.Date;
+import java.time.LocalDate;
 
 @Entity(name = "invoice")
 @Getter
 @Setter
 public class InvoiceEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     private Integer invoiceNumber;
 
-    @Column(nullable = false)
     @Temporal(TemporalType.DATE)
-    private Date issued;
+    private LocalDate issued;
 
-    @Column(nullable = false)
     @Temporal(TemporalType.DATE)
-    private Date dueDate;
+    private LocalDate dueDate;
 
-    @Column(nullable = false)
     private String product;
 
-    @Column(nullable = false)
     private Long price;
 
-    @Column(nullable = false)
     private Integer vat;
 
     private String note;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "buyer_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "buyer_id")
     private PersonEntity buyer;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "seller_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "seller_id")
     private PersonEntity seller;
 }
