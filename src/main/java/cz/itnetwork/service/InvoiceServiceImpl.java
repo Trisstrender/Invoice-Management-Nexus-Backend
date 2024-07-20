@@ -46,9 +46,52 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Override
     public List<InvoiceDTO> getInvoices(Map<String, String> params) {
-        // Fetch all invoices from the repository, apply filtering logic if needed
-        List<InvoiceEntity> invoices = invoiceRepository.findAll(); // Placeholder for filtered query
-        // Convert the list of entities to a list of DTOs
+        // Retrieve all invoices from the repository
+        List<InvoiceEntity> invoices = invoiceRepository.findAll();
+
+        // Apply filtering based on parameters
+        if (params.containsKey("buyerID")) {
+            long buyerID = Long.parseLong(params.get("buyerID"));
+            invoices = invoices.stream()
+                    .filter(invoice -> invoice.getBuyer().getId() == buyerID)
+                    .collect(Collectors.toList());
+        }
+
+        if (params.containsKey("sellerID")) {
+            long sellerID = Long.parseLong(params.get("sellerID"));
+            invoices = invoices.stream()
+                    .filter(invoice -> invoice.getSeller().getId() == sellerID)
+                    .collect(Collectors.toList());
+        }
+
+        if (params.containsKey("product")) {
+            String product = params.get("product");
+            invoices = invoices.stream()
+                    .filter(invoice -> invoice.getProduct().equalsIgnoreCase(product))
+                    .collect(Collectors.toList());
+        }
+
+        if (params.containsKey("minPrice")) {
+            long minPrice = Long.parseLong(params.get("minPrice"));
+            invoices = invoices.stream()
+                    .filter(invoice -> invoice.getPrice() >= minPrice)
+                    .collect(Collectors.toList());
+        }
+
+        if (params.containsKey("maxPrice")) {
+            long maxPrice = Long.parseLong(params.get("maxPrice"));
+            invoices = invoices.stream()
+                    .filter(invoice -> invoice.getPrice() <= maxPrice)
+                    .collect(Collectors.toList());
+        }
+
+        // Apply limit if specified
+        if (params.containsKey("limit")) {
+            int limit = Integer.parseInt(params.get("limit"));
+            invoices = invoices.stream().limit(limit).collect(Collectors.toList());
+        }
+
+        // Convert the filtered list of entities to a list of DTOs
         return invoices.stream().map(invoiceMapper::toDTO).collect(Collectors.toList());
     }
 
