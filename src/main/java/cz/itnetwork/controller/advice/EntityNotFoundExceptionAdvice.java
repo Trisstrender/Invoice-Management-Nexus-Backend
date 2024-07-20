@@ -13,6 +13,7 @@ public class EntityNotFoundExceptionAdvice {
     @ExceptionHandler({NotFoundException.class, EntityNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public void handleEntityNotFoundException() {
+        // Handles NotFoundException and EntityNotFoundException by returning a 404 status
     }
 
 }

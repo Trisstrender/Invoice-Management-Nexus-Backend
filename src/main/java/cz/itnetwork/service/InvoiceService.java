@@ -6,12 +6,20 @@ import java.util.List;
 import java.util.Map;
 
 public interface InvoiceService {
+
+    // CRUD operations
     InvoiceDTO createInvoice(InvoiceDTO invoiceDTO);
-    List<InvoiceDTO> getInvoices(Map<String, String> params);
     InvoiceDTO getInvoiceById(long id);
     InvoiceDTO updateInvoice(long id, InvoiceDTO invoiceDTO);
     void deleteInvoice(long id);
+
+    // Retrieval operations
+    List<InvoiceDTO> getInvoices(Map<String, String> params);
+
+    // Statistics and reporting
     Map<String, Object> getInvoiceStatistics();
+
+    // Person-specific operations
     List<InvoiceDTO> getPersonSales(String identificationNumber);
     List<InvoiceDTO> getPersonPurchases(String identificationNumber);
 }

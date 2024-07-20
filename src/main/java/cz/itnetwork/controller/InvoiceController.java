@@ -16,32 +16,38 @@ public class InvoiceController {
     @Autowired
     private InvoiceService invoiceService;
 
+    // Create a new invoice
     @PostMapping
     public InvoiceDTO createInvoice(@RequestBody InvoiceDTO invoiceDTO) {
         return invoiceService.createInvoice(invoiceDTO);
     }
 
-    @GetMapping
-    public List<InvoiceDTO> getInvoices(@RequestParam Map<String, String> params) {
-        return invoiceService.getInvoices(params);
-    }
-
+    // Retrieve a specific invoice by ID
     @GetMapping("/{invoiceId}")
     public InvoiceDTO getInvoice(@PathVariable Long invoiceId) {
         return invoiceService.getInvoiceById(invoiceId);
     }
 
+    // Update an existing invoice by ID
     @PutMapping("/{invoiceId}")
     public InvoiceDTO updateInvoice(@PathVariable Long invoiceId, @RequestBody InvoiceDTO invoiceDTO) {
         return invoiceService.updateInvoice(invoiceId, invoiceDTO);
     }
 
+    // Delete an invoice by ID
     @DeleteMapping("/{invoiceId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteInvoice(@PathVariable Long invoiceId) {
         invoiceService.deleteInvoice(invoiceId);
     }
 
+    // Retrieve a list of invoices with optional filtering parameters
+    @GetMapping
+    public List<InvoiceDTO> getInvoices(@RequestParam Map<String, String> params) {
+        return invoiceService.getInvoices(params);
+    }
+
+    // Retrieve statistics related to invoices
     @GetMapping("/statistics")
     public Map<String, Object> getInvoiceStatistics() {
         return invoiceService.getInvoiceStatistics();
