@@ -36,6 +36,8 @@ public class InvoiceDTO {
     @NotNull
     private Integer vat;
 
+    private String note;
+
     @NotNull
     private PersonDTO buyer;
 
