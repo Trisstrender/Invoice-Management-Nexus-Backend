@@ -9,8 +9,11 @@ public interface InvoiceService {
 
     // CRUD operations
     InvoiceDTO createInvoice(InvoiceDTO invoiceDTO);
+
     InvoiceDTO getInvoiceById(long id);
+
     InvoiceDTO updateInvoice(long id, InvoiceDTO invoiceDTO);
+
     void deleteInvoice(long id);
 
     // Retrieval operations
@@ -21,5 +24,6 @@ public interface InvoiceService {
 
     // Person-specific operations
     List<InvoiceDTO> getPersonSales(String identificationNumber);
+
     List<InvoiceDTO> getPersonPurchases(String identificationNumber);
 }
