@@ -43,7 +43,15 @@ public class InvoiceController {
 
     // Retrieve a list of invoices with optional filtering parameters
     @GetMapping
-    public List<InvoiceDTO> getInvoices(@RequestParam Map<String, String> params) {
+    public List<InvoiceDTO> getInvoices(
+            @RequestParam Map<String, String> params,
+            @RequestParam(defaultValue = "id,asc") String sort,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit
+    ) {
+        params.put("sort", sort);
+        params.put("page", String.valueOf(page));
+        params.put("limit", String.valueOf(limit));
         return invoiceService.getInvoices(params);
     }
 

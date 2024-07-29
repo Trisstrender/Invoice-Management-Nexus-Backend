@@ -11,9 +11,7 @@ import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -51,50 +49,93 @@ public class InvoiceServiceImpl implements InvoiceService {
         // Retrieve all invoices from the repository
         List<InvoiceEntity> invoices = invoiceRepository.findAll();
 
-        // Apply filtering based on parameters
-        if (params.containsKey("buyerID")) {
+        // Apply filtering
+        invoices = applyFilters(invoices, params);
+
+        // Apply sorting
+        invoices = applySorting(invoices, params.get("sort"));
+
+        // Apply pagination
+        invoices = applyPagination(invoices, params);
+
+        // Convert the filtered list of entities to a list of DTOs
+        return invoices.stream().map(invoiceMapper::toDTO).collect(Collectors.toList());
+    }
+
+    private List<InvoiceEntity> applyFilters(List<InvoiceEntity> invoices, Map<String, String> params) {
+        if (params.containsKey("buyerID") && !params.get("buyerID").isEmpty()) {
             long buyerID = Long.parseLong(params.get("buyerID"));
             invoices = invoices.stream()
                     .filter(invoice -> invoice.getBuyer().getId() == buyerID)
                     .collect(Collectors.toList());
         }
 
-        if (params.containsKey("sellerID")) {
+        if (params.containsKey("sellerID") && !params.get("sellerID").isEmpty()) {
             long sellerID = Long.parseLong(params.get("sellerID"));
             invoices = invoices.stream()
                     .filter(invoice -> invoice.getSeller().getId() == sellerID)
                     .collect(Collectors.toList());
         }
 
-        if (params.containsKey("product")) {
+        if (params.containsKey("product") && !params.get("product").isEmpty()) {
             String product = params.get("product");
             invoices = invoices.stream()
-                    .filter(invoice -> invoice.getProduct().equalsIgnoreCase(product))
+                    .filter(invoice -> invoice.getProduct().toLowerCase().contains(product.toLowerCase()))
                     .collect(Collectors.toList());
         }
 
-        if (params.containsKey("minPrice")) {
+        if (params.containsKey("minPrice") && !params.get("minPrice").isEmpty()) {
             long minPrice = Long.parseLong(params.get("minPrice"));
             invoices = invoices.stream()
                     .filter(invoice -> invoice.getPrice() >= minPrice)
                     .collect(Collectors.toList());
         }
 
-        if (params.containsKey("maxPrice")) {
+        if (params.containsKey("maxPrice") && !params.get("maxPrice").isEmpty()) {
             long maxPrice = Long.parseLong(params.get("maxPrice"));
             invoices = invoices.stream()
                     .filter(invoice -> invoice.getPrice() <= maxPrice)
                     .collect(Collectors.toList());
         }
 
-        // Apply limit if specified
-        if (params.containsKey("limit")) {
-            int limit = Integer.parseInt(params.get("limit"));
-            invoices = invoices.stream().limit(limit).collect(Collectors.toList());
+        return invoices;
+    }
+
+    private List<InvoiceEntity> applySorting(List<InvoiceEntity> invoices, String sortParam) {
+        if (sortParam != null && !sortParam.isEmpty()) {
+            String[] sortParams = sortParam.split(",");
+            String field = sortParams[0];
+            boolean ascending = sortParams.length == 1 || sortParams[1].equalsIgnoreCase("asc");
+
+            Comparator<InvoiceEntity> comparator = switch (field) {
+                case "invoiceNumber" -> Comparator.comparing(InvoiceEntity::getInvoiceNumber);
+                case "issued" -> Comparator.comparing(InvoiceEntity::getIssued);
+                case "product" -> Comparator.comparing(InvoiceEntity::getProduct);
+                case "price" -> Comparator.comparing(InvoiceEntity::getPrice);
+                default -> Comparator.comparing(InvoiceEntity::getId);
+            };
+
+            if (!ascending) {
+                comparator = comparator.reversed();
+            }
+
+            return invoices.stream().sorted(comparator).collect(Collectors.toList());
+        }
+        return invoices;
+    }
+
+    private List<InvoiceEntity> applyPagination(List<InvoiceEntity> invoices, Map<String, String> params) {
+        int page = params.containsKey("page") && !params.get("page").isEmpty() ? Integer.parseInt(params.get("page")) : 1;
+        int limit = params.containsKey("limit") && !params.get("limit").isEmpty() ? Integer.parseInt(params.get("limit")) : 10;
+
+        int fromIndex = (page - 1) * limit;
+        int toIndex = Math.min(fromIndex + limit, invoices.size());
+
+        if (fromIndex >= invoices.size()) {
+            return new ArrayList<>(); // Return empty list if page is out of range
         }
 
-        // Convert the filtered list of entities to a list of DTOs
-        return invoices.stream().map(invoiceMapper::toDTO).collect(Collectors.toList());
+        return invoices.subList(fromIndex, toIndex);
     }
 
     @Override
