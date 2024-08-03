@@ -45,7 +45,7 @@ public class InvoiceController {
     /**
      * Updates an existing invoice.
      *
-     * @param invoiceId The ID of the invoice to update
+     * @param invoiceId  The ID of the invoice to update
      * @param invoiceDTO The updated invoice data transfer object
      * @return The updated invoice DTO
      */
@@ -69,9 +69,9 @@ public class InvoiceController {
      * Retrieves a list of invoices with optional filtering, sorting, and pagination.
      *
      * @param params Map of query parameters for filtering and sorting
-     * @param sort Sorting parameter (default: "id,asc")
-     * @param page Page number (default: 1)
-     * @param limit Number of items per page (default: 10)
+     * @param sort   Sorting parameter (default: "id,asc")
+     * @param page   Page number (default: 1)
+     * @param limit  Number of items per page (default: 10)
      * @return List of invoice DTOs matching the criteria
      */
     @GetMapping

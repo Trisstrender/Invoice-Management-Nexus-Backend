@@ -31,7 +31,7 @@ public interface PersonService {
     /**
      * Updates an existing person.
      *
-     * @param id The ID of the person to update
+     * @param id        The ID of the person to update
      * @param personDTO The updated person data
      * @return The updated person DTO
      */

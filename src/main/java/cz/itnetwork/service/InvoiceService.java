@@ -30,7 +30,7 @@ public interface InvoiceService {
     /**
      * Updates an existing invoice.
      *
-     * @param id The ID of the invoice to update
+     * @param id         The ID of the invoice to update
      * @param invoiceDTO The updated invoice data
      * @return The updated invoice DTO
      */

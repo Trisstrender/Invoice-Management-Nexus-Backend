@@ -45,7 +45,7 @@ public class PersonController {
     /**
      * Updates an existing person.
      *
-     * @param personId The ID of the person to update
+     * @param personId  The ID of the person to update
      * @param personDTO The updated person data transfer object
      * @return The updated person DTO
      */

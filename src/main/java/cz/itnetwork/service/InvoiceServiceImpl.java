@@ -72,7 +72,7 @@ public class InvoiceServiceImpl implements InvoiceService {
      * Applies filters to the list of invoices based on the provided parameters.
      *
      * @param invoices The list of invoices to filter
-     * @param params The filter parameters
+     * @param params   The filter parameters
      * @return The filtered list of invoices
      */
     private List<InvoiceEntity> applyFilters(List<InvoiceEntity> invoices, Map<String, String> params) {
@@ -117,7 +117,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     /**
      * Applies sorting to the list of invoices based on the provided sort parameter.
      *
-     * @param invoices The list of invoices to sort
+     * @param invoices  The list of invoices to sort
      * @param sortParam The sort parameter
      * @return The sorted list of invoices
      */
@@ -148,7 +148,7 @@ public class InvoiceServiceImpl implements InvoiceService {
      * Applies pagination to the list of invoices based on the provided parameters.
      *
      * @param invoices The list of invoices to paginate
-     * @param params The pagination parameters
+     * @param params   The pagination parameters
      * @return The paginated list of invoices
      */
     private List<InvoiceEntity> applyPagination(List<InvoiceEntity> invoices, Map<String, String> params) {
@@ -182,7 +182,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     /**
      * Updates an existing invoice.
      *
-     * @param id The ID of the invoice to update
+     * @param id         The ID of the invoice to update
      * @param invoiceDTO The updated invoice data
      * @return The updated invoice DTO
      * @throws EntityNotFoundException if the invoice, buyer, or seller is not found

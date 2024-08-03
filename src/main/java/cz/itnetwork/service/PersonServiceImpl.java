@@ -61,7 +61,7 @@ public class PersonServiceImpl implements PersonService {
      * Updates an existing person.
      * This method creates a new person entity and hides the old one to maintain historical data.
      *
-     * @param id The ID of the person to update
+     * @param id        The ID of the person to update
      * @param personDTO The updated person data
      * @return The updated person DTO
      * @throws NotFoundException if the person is not found

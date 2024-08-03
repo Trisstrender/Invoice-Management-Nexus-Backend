@@ -36,7 +36,7 @@ public interface InvoiceMapper {
     /**
      * Updates an existing InvoiceEntity with data from an InvoiceDTO.
      *
-     * @param dto The source InvoiceDTO
+     * @param dto    The source InvoiceDTO
      * @param entity The target InvoiceEntity to update
      */
     @Mapping(target = "id", ignore = true)
