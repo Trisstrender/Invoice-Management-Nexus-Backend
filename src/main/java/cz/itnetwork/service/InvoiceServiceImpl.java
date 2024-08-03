@@ -70,6 +70,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     /**
      * Applies filters to the list of invoices based on the provided parameters.
+     * Filters include buyerID, sellerID, product, minPrice, and maxPrice.
      *
      * @param invoices The list of invoices to filter
      * @param params   The filter parameters
@@ -116,6 +117,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     /**
      * Applies sorting to the list of invoices based on the provided sort parameter.
+     * Supports sorting by invoiceNumber, issued date, product, and price.
      *
      * @param invoices  The list of invoices to sort
      * @param sortParam The sort parameter
@@ -146,6 +148,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     /**
      * Applies pagination to the list of invoices based on the provided parameters.
+     * Uses 'page' and 'limit' parameters to determine which subset of invoices to return.
      *
      * @param invoices The list of invoices to paginate
      * @param params   The pagination parameters

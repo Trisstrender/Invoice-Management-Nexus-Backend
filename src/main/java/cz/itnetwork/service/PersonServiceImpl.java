@@ -60,6 +60,8 @@ public class PersonServiceImpl implements PersonService {
     /**
      * Updates an existing person.
      * This method creates a new person entity and hides the old one to maintain historical data.
+     * This approach ensures that existing invoices continue to reference the correct person data,
+     * while allowing for updates to person information for future use.
      *
      * @param id        The ID of the person to update
      * @param personDTO The updated person data
