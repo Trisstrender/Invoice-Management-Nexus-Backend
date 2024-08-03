@@ -7,6 +7,9 @@ import lombok.Setter;
 
 import java.util.List;
 
+/**
+ * Entity class representing a Person in the database.
+ */
 @Entity(name = "person")
 @Getter
 @Setter

@@ -6,6 +6,9 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
+/**
+ * Entity class representing an Invoice in the database.
+ */
 @Entity(name = "invoice")
 @Getter
 @Setter

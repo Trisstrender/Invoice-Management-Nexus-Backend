@@ -9,6 +9,10 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
+/**
+ * Data Transfer Object (DTO) for Invoice.
+ * This class represents the invoice data that is transferred between the client and the server.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

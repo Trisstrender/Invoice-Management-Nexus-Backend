@@ -14,6 +14,10 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Implementation of the InvoiceService interface.
+ * This class provides the business logic for invoice-related operations.
+ */
 @Service
 public class InvoiceServiceImpl implements InvoiceService {
 
@@ -26,42 +30,51 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Autowired
     private InvoiceMapper invoiceMapper;
 
+    /**
+     * Creates a new invoice.
+     *
+     * @param invoiceDTO The invoice data to create
+     * @return The created invoice DTO
+     * @throws EntityNotFoundException if the buyer or seller is not found
+     */
     @Override
     public InvoiceDTO createInvoice(InvoiceDTO invoiceDTO) {
-        // Convert InvoiceDTO to InvoiceEntity
         InvoiceEntity entity = invoiceMapper.toEntity(invoiceDTO);
 
-        // Fetch buyer from the database by ID, throw exception if not found
         entity.setBuyer(personRepository.findById(invoiceDTO.getBuyer().getId())
                 .orElseThrow(() -> new EntityNotFoundException("Buyer not found")));
 
-        // Fetch seller from the database by ID, throw exception if not found
         entity.setSeller(personRepository.findById(invoiceDTO.getSeller().getId())
                 .orElseThrow(() -> new EntityNotFoundException("Seller not found")));
 
-        // Save the entity to the repository and convert it back to DTO
         entity = invoiceRepository.save(entity);
         return invoiceMapper.toDTO(entity);
     }
 
+    /**
+     * Retrieves a list of invoices based on given parameters.
+     *
+     * @param params Map of parameters for filtering, sorting, and pagination
+     * @return List of invoice DTOs matching the criteria
+     */
     @Override
     public List<InvoiceDTO> getInvoices(Map<String, String> params) {
-        // Retrieve all invoices from the repository
         List<InvoiceEntity> invoices = invoiceRepository.findAll();
 
-        // Apply filtering
         invoices = applyFilters(invoices, params);
-
-        // Apply sorting
         invoices = applySorting(invoices, params.get("sort"));
-
-        // Apply pagination
         invoices = applyPagination(invoices, params);
 
-        // Convert the filtered list of entities to a list of DTOs
         return invoices.stream().map(invoiceMapper::toDTO).collect(Collectors.toList());
     }
 
+    /**
+     * Applies filters to the list of invoices based on the provided parameters.
+     *
+     * @param invoices The list of invoices to filter
+     * @param params The filter parameters
+     * @return The filtered list of invoices
+     */
     private List<InvoiceEntity> applyFilters(List<InvoiceEntity> invoices, Map<String, String> params) {
         if (params.containsKey("buyerID") && !params.get("buyerID").isEmpty()) {
             long buyerID = Long.parseLong(params.get("buyerID"));
@@ -101,6 +114,13 @@ public class InvoiceServiceImpl implements InvoiceService {
         return invoices;
     }
 
+    /**
+     * Applies sorting to the list of invoices based on the provided sort parameter.
+     *
+     * @param invoices The list of invoices to sort
+     * @param sortParam The sort parameter
+     * @return The sorted list of invoices
+     */
     private List<InvoiceEntity> applySorting(List<InvoiceEntity> invoices, String sortParam) {
         if (sortParam != null && !sortParam.isEmpty()) {
             String[] sortParams = sortParam.split(",");
@@ -124,6 +144,13 @@ public class InvoiceServiceImpl implements InvoiceService {
         return invoices;
     }
 
+    /**
+     * Applies pagination to the list of invoices based on the provided parameters.
+     *
+     * @param invoices The list of invoices to paginate
+     * @param params The pagination parameters
+     * @return The paginated list of invoices
+     */
     private List<InvoiceEntity> applyPagination(List<InvoiceEntity> invoices, Map<String, String> params) {
         int page = params.containsKey("page") && !params.get("page").isEmpty() ? Integer.parseInt(params.get("page")) : 1;
         int limit = params.containsKey("limit") && !params.get("limit").isEmpty() ? Integer.parseInt(params.get("limit")) : 10;
@@ -138,68 +165,80 @@ public class InvoiceServiceImpl implements InvoiceService {
         return invoices.subList(fromIndex, toIndex);
     }
 
+    /**
+     * Retrieves an invoice by its ID.
+     *
+     * @param id The ID of the invoice to retrieve
+     * @return The retrieved invoice DTO
+     * @throws NotFoundException if the invoice is not found
+     */
     @Override
     public InvoiceDTO getInvoiceById(long id) {
-        // Fetch the invoice by ID, throw exception if not found
         InvoiceEntity entity = invoiceRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Invoice not found"));
-        // Convert the entity to DTO and return
         return invoiceMapper.toDTO(entity);
     }
 
+    /**
+     * Updates an existing invoice.
+     *
+     * @param id The ID of the invoice to update
+     * @param invoiceDTO The updated invoice data
+     * @return The updated invoice DTO
+     * @throws EntityNotFoundException if the invoice, buyer, or seller is not found
+     */
     @Override
     public InvoiceDTO updateInvoice(long id, InvoiceDTO invoiceDTO) {
-        // Fetch the existing invoice by ID, throw exception if not found
         InvoiceEntity existingInvoice = invoiceRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Invoice not found"));
 
-        // Update the existing entity with data from the DTO
         invoiceMapper.updateEntityFromDto(invoiceDTO, existingInvoice);
 
-        // Update buyer if provided in the DTO
         if (invoiceDTO.getBuyer() != null && invoiceDTO.getBuyer().getId() != null) {
             existingInvoice.setBuyer(personRepository.findById(invoiceDTO.getBuyer().getId())
                     .orElseThrow(() -> new EntityNotFoundException("Buyer not found")));
         }
 
-        // Update seller if provided in the DTO
         if (invoiceDTO.getSeller() != null && invoiceDTO.getSeller().getId() != null) {
             existingInvoice.setSeller(personRepository.findById(invoiceDTO.getSeller().getId())
                     .orElseThrow(() -> new EntityNotFoundException("Seller not found")));
         }
 
-        // Save the updated entity and convert it back to DTO
         existingInvoice = invoiceRepository.save(existingInvoice);
 
         return invoiceMapper.toDTO(existingInvoice);
     }
 
+    /**
+     * Deletes an invoice by its ID.
+     *
+     * @param id The ID of the invoice to delete
+     */
     @Override
     public void deleteInvoice(long id) {
-        // Delete the invoice by ID
         invoiceRepository.deleteById(id);
     }
 
+    /**
+     * Retrieves invoice statistics.
+     *
+     * @return Map of invoice statistics
+     */
     @Override
     public Map<String, Object> getInvoiceStatistics() {
-        // Get the current year
         long currentYear = LocalDate.now().getYear();
 
-        // Calculate the sum of prices for invoices issued this year
         long currentYearSum = invoiceRepository.findAll().stream()
                 .filter(invoice -> invoice.getIssued().getYear() == currentYear)
                 .mapToLong(InvoiceEntity::getPrice)
                 .sum();
 
-        // Calculate the sum of prices for all invoices
         long allTimeSum = invoiceRepository.findAll().stream()
                 .mapToLong(InvoiceEntity::getPrice)
                 .sum();
 
-        // Count the total number of invoices
         long invoicesCount = invoiceRepository.count();
 
-        // Create a map to hold the statistics
         Map<String, Object> statistics = new HashMap<>();
         statistics.put("currentYearSum", currentYearSum);
         statistics.put("allTimeSum", allTimeSum);
@@ -208,19 +247,27 @@ public class InvoiceServiceImpl implements InvoiceService {
         return statistics;
     }
 
+    /**
+     * Retrieves sales invoices for a specific person.
+     *
+     * @param identificationNumber The identification number of the person
+     * @return List of invoice DTOs representing the person's sales
+     */
     @Override
     public List<InvoiceDTO> getPersonSales(String identificationNumber) {
-        // Fetch invoices where the person is the seller by identification number
         List<InvoiceEntity> sales = invoiceRepository.findBySeller_IdentificationNumber(identificationNumber);
-        // Convert the list of entities to a list of DTOs
         return sales.stream().map(invoiceMapper::toDTO).collect(Collectors.toList());
     }
 
+    /**
+     * Retrieves purchase invoices for a specific person.
+     *
+     * @param identificationNumber The identification number of the person
+     * @return List of invoice DTOs representing the person's purchases
+     */
     @Override
     public List<InvoiceDTO> getPersonPurchases(String identificationNumber) {
-        // Fetch invoices where the person is the buyer by identification number
         List<InvoiceEntity> purchases = invoiceRepository.findByBuyer_IdentificationNumber(identificationNumber);
-        // Convert the list of entities to a list of DTOs
         return purchases.stream().map(invoiceMapper::toDTO).collect(Collectors.toList());
     }
 }

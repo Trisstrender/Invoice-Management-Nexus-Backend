@@ -1,6 +1,9 @@
 package cz.itnetwork.constant;
 
-// Enum for countries
+/**
+ * Enum representing countries supported in the application.
+ * Currently supports CZECHIA and SLOVAKIA.
+ */
 public enum Countries {
     CZECHIA, SLOVAKIA
 }

@@ -15,6 +15,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Implementation of the PersonService interface.
+ * This class provides the business logic for person-related operations.
+ */
 @Service
 public class PersonServiceImpl implements PersonService {
 
@@ -27,22 +31,41 @@ public class PersonServiceImpl implements PersonService {
     @Autowired
     private InvoiceService invoiceService;
 
-    // CRUD operations
+    /**
+     * Adds a new person.
+     *
+     * @param personDTO The person data to add
+     * @return The added person DTO
+     */
     @Override
     public PersonDTO addPerson(PersonDTO personDTO) {
-        // Convert DTO to entity and save
         PersonEntity entity = personMapper.toEntity(personDTO);
         entity = personRepository.save(entity);
         return personMapper.toDTO(entity);
     }
 
+    /**
+     * Retrieves a person by their ID.
+     *
+     * @param id The ID of the person to retrieve
+     * @return The retrieved person DTO
+     * @throws NotFoundException if the person is not found
+     */
     @Override
     public PersonDTO getPersonById(long id) {
-        // Fetch person by ID and convert to DTO
         PersonEntity personEntity = fetchPersonById(id);
         return personMapper.toDTO(personEntity);
     }
 
+    /**
+     * Updates an existing person.
+     * This method creates a new person entity and hides the old one to maintain historical data.
+     *
+     * @param id The ID of the person to update
+     * @param personDTO The updated person data
+     * @return The updated person DTO
+     * @throws NotFoundException if the person is not found
+     */
     @Override
     public PersonDTO updatePerson(long id, PersonDTO personDTO) {
         // Set existing person as hidden and save
@@ -58,10 +81,16 @@ public class PersonServiceImpl implements PersonService {
         return personMapper.toDTO(newPerson);
     }
 
+    /**
+     * Removes a person by their ID.
+     * This method actually hides the person instead of deleting them to maintain historical data.
+     *
+     * @param id The ID of the person to remove
+     */
     @Override
-    public void removePerson(long personId) {
+    public void removePerson(long id) {
         try {
-            PersonEntity person = fetchPersonById(personId);
+            PersonEntity person = fetchPersonById(id);
             person.setHidden(true);
             personRepository.save(person);
         } catch (NotFoundException ignored) {
@@ -69,7 +98,11 @@ public class PersonServiceImpl implements PersonService {
         }
     }
 
-    // List operations
+    /**
+     * Retrieves all non-hidden persons.
+     *
+     * @return List of all non-hidden person DTOs
+     */
     @Override
     public List<PersonDTO> getAll() {
         return personRepository.findByHidden(false)
@@ -78,18 +111,34 @@ public class PersonServiceImpl implements PersonService {
                 .collect(Collectors.toList());
     }
 
-    // Person-specific operations
+    /**
+     * Retrieves sales invoices for a specific person.
+     *
+     * @param identificationNumber The identification number of the person
+     * @return List of invoice DTOs representing the person's sales
+     */
     @Override
     public List<InvoiceDTO> getPersonSales(String identificationNumber) {
         return invoiceService.getPersonSales(identificationNumber);
     }
 
+    /**
+     * Retrieves purchase invoices for a specific person.
+     *
+     * @param identificationNumber The identification number of the person
+     * @return List of invoice DTOs representing the person's purchases
+     */
     @Override
     public List<InvoiceDTO> getPersonPurchases(String identificationNumber) {
         return invoiceService.getPersonPurchases(identificationNumber);
     }
 
-    // Statistics
+    /**
+     * Retrieves person statistics.
+     * This method calculates the total revenue for each person based on their sales.
+     *
+     * @return List of maps containing person statistics (personId, personName, revenue)
+     */
     @Override
     public List<Map<String, Object>> getPersonStatistics() {
         return personRepository.findAll().stream()
@@ -104,7 +153,13 @@ public class PersonServiceImpl implements PersonService {
                 .collect(Collectors.toList());
     }
 
-    // Helper method to fetch person by ID
+    /**
+     * Helper method to fetch a person by ID.
+     *
+     * @param id The ID of the person to fetch
+     * @return The PersonEntity
+     * @throws NotFoundException if the person is not found
+     */
     private PersonEntity fetchPersonById(long id) {
         return personRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Person with id " + id + " wasn't found in the database."));

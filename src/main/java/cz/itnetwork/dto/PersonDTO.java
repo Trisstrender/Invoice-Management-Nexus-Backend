@@ -7,6 +7,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Data Transfer Object (DTO) for Person.
+ * This class represents the person data that is transferred between the client and the server.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
