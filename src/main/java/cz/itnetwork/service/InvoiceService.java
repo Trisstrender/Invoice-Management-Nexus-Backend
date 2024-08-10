@@ -1,6 +1,7 @@
 package cz.itnetwork.service;
 
 import cz.itnetwork.dto.InvoiceDTO;
+import cz.itnetwork.dto.PaginatedResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -49,7 +50,7 @@ public interface InvoiceService {
      * @param params Map of parameters for filtering and pagination
      * @return List of invoice DTOs matching the criteria
      */
-    List<InvoiceDTO> getInvoices(Map<String, String> params);
+    PaginatedResponse<InvoiceDTO> getInvoices(Map<String, String> params);
 
     /**
      * Retrieves invoice statistics.

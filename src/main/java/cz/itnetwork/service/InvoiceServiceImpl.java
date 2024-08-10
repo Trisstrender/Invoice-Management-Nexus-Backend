@@ -1,6 +1,7 @@
 package cz.itnetwork.service;
 
 import cz.itnetwork.dto.InvoiceDTO;
+import cz.itnetwork.dto.PaginatedResponse;
 import cz.itnetwork.dto.mapper.InvoiceMapper;
 import cz.itnetwork.entity.InvoiceEntity;
 import cz.itnetwork.entity.repository.InvoiceRepository;
@@ -58,14 +59,25 @@ public class InvoiceServiceImpl implements InvoiceService {
      * @return List of invoice DTOs matching the criteria
      */
     @Override
-    public List<InvoiceDTO> getInvoices(Map<String, String> params) {
+    public PaginatedResponse<InvoiceDTO> getInvoices(Map<String, String> params) {
         List<InvoiceEntity> invoices = invoiceRepository.findAll();
 
         invoices = applyFilters(invoices, params);
         invoices = applySorting(invoices, params.get("sort"));
-        invoices = applyPagination(invoices, params);
 
-        return invoices.stream().map(invoiceMapper::toDTO).collect(Collectors.toList());
+        int page = Integer.parseInt(params.getOrDefault("page", "1"));
+        int limit = Integer.parseInt(params.getOrDefault("limit", "10"));
+
+        int totalItems = invoices.size();
+        int totalPages = (int) Math.ceil((double) totalItems / limit);
+
+        invoices = applyPagination(invoices, page, limit);
+
+        List<InvoiceDTO> invoiceDTOs = invoices.stream()
+                .map(invoiceMapper::toDTO)
+                .collect(Collectors.toList());
+
+        return new PaginatedResponse<>(invoiceDTOs, page, totalPages, totalItems);
     }
 
     /**
@@ -147,22 +159,19 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     /**
-     * Applies pagination to the list of invoices based on the provided parameters.
-     * Uses 'page' and 'limit' parameters to determine which subset of invoices to return.
+     * Applies pagination to the list of invoices based on the provided page and limit parameters.
      *
      * @param invoices The list of invoices to paginate
-     * @param params   The pagination parameters
+     * @param page     The page number
+     * @param limit    The number of items per page
      * @return The paginated list of invoices
      */
-    private List<InvoiceEntity> applyPagination(List<InvoiceEntity> invoices, Map<String, String> params) {
-        int page = params.containsKey("page") && !params.get("page").isEmpty() ? Integer.parseInt(params.get("page")) : 1;
-        int limit = params.containsKey("limit") && !params.get("limit").isEmpty() ? Integer.parseInt(params.get("limit")) : 10;
-
+    private List<InvoiceEntity> applyPagination(List<InvoiceEntity> invoices, int page, int limit) {
         int fromIndex = (page - 1) * limit;
         int toIndex = Math.min(fromIndex + limit, invoices.size());
 
         if (fromIndex >= invoices.size()) {
-            return new ArrayList<>(); // Return empty list if page is out of range
+            return new ArrayList<>();
         }
 
         return invoices.subList(fromIndex, toIndex);

@@ -1,12 +1,12 @@
 package cz.itnetwork.controller;
 
 import cz.itnetwork.dto.InvoiceDTO;
+import cz.itnetwork.dto.PaginatedResponse;
 import cz.itnetwork.service.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -75,7 +75,7 @@ public class InvoiceController {
      * @return List of invoice DTOs matching the criteria
      */
     @GetMapping
-    public List<InvoiceDTO> getInvoices(
+    public PaginatedResponse<InvoiceDTO> getInvoices(
             @RequestParam Map<String, String> params,
             @RequestParam(defaultValue = "id,asc") String sort,
             @RequestParam(defaultValue = "1") int page,
