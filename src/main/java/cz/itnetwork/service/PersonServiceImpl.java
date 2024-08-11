@@ -127,9 +127,9 @@ public class PersonServiceImpl implements PersonService {
         if (params.containsKey("name") || params.containsKey("identificationNumber")) {
             String name = params.getOrDefault("name", "");
             String identificationNumber = params.getOrDefault("identificationNumber", "");
-            personPage = personRepository.findByNameContainingAndIdentificationNumberContaining(name, identificationNumber, pageable);
+            personPage = personRepository.findByNameContainingAndIdentificationNumberContainingAndHiddenFalse(name, identificationNumber, pageable);
         } else {
-            personPage = personRepository.findAll(pageable);
+            personPage = personRepository.findByHiddenFalse(pageable);
         }
 
         List<PersonDTO> personDTOs = personPage.getContent().stream()
