@@ -1,12 +1,17 @@
 package cz.itnetwork.service;
 
 import cz.itnetwork.dto.InvoiceDTO;
+import cz.itnetwork.dto.PaginatedResponse;
 import cz.itnetwork.dto.PersonDTO;
 import cz.itnetwork.dto.mapper.PersonMapper;
 import cz.itnetwork.entity.InvoiceEntity;
 import cz.itnetwork.entity.PersonEntity;
 import cz.itnetwork.entity.repository.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
 
@@ -106,11 +111,37 @@ public class PersonServiceImpl implements PersonService {
      * @return List of all non-hidden person DTOs
      */
     @Override
-    public List<PersonDTO> getAll() {
-        return personRepository.findByHidden(false)
-                .stream()
+    public PaginatedResponse<PersonDTO> getPersons(Map<String, String> params) {
+        int page = Integer.parseInt(params.getOrDefault("page", "1"));
+        int limit = Integer.parseInt(params.getOrDefault("limit", "10"));
+        String sortParam = params.getOrDefault("sort", "id,asc");
+        String[] sortParams = sortParam.split(",");
+        String sortField = sortParams[0];
+        Sort.Direction sortDirection = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")
+                ? Sort.Direction.DESC : Sort.Direction.ASC;
+
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by(sortDirection, sortField));
+
+        Page<PersonEntity> personPage;
+
+        if (params.containsKey("name") || params.containsKey("identificationNumber")) {
+            String name = params.getOrDefault("name", "");
+            String identificationNumber = params.getOrDefault("identificationNumber", "");
+            personPage = personRepository.findByNameContainingAndIdentificationNumberContaining(name, identificationNumber, pageable);
+        } else {
+            personPage = personRepository.findAll(pageable);
+        }
+
+        List<PersonDTO> personDTOs = personPage.getContent().stream()
                 .map(personMapper::toDTO)
                 .collect(Collectors.toList());
+
+        return new PaginatedResponse<>(
+                personDTOs,
+                personPage.getNumber() + 1,
+                personPage.getTotalPages(),
+                (int) personPage.getTotalElements()
+        );
     }
 
     /**

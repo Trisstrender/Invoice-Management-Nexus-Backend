@@ -1,6 +1,7 @@
 package cz.itnetwork.controller;
 
 import cz.itnetwork.dto.InvoiceDTO;
+import cz.itnetwork.dto.PaginatedResponse;
 import cz.itnetwork.dto.PersonDTO;
 import cz.itnetwork.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,13 +66,25 @@ public class PersonController {
     }
 
     /**
-     * Retrieves a list of all persons.
+     * Retrieves a list of persons based on given parameters.
      *
-     * @return List of all person DTOs
+     * @param params Map of parameters for filtering and pagination
+     * @param sort   The sorting criteria
+     * @param page   The page number
+     * @param limit  The maximum number of items to return
+     * @return Paginated response containing a list of person DTOs
      */
     @GetMapping("/persons")
-    public List<PersonDTO> getPersons() {
-        return personService.getAll();
+    public PaginatedResponse<PersonDTO> getPersons(
+            @RequestParam Map<String, String> params,
+            @RequestParam(defaultValue = "id,asc") String sort,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit
+    ) {
+        params.put("sort", sort);
+        params.put("page", String.valueOf(page));
+        params.put("limit", String.valueOf(limit));
+        return personService.getPersons(params);
     }
 
     /**

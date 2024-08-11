@@ -1,6 +1,7 @@
 package cz.itnetwork.service;
 
 import cz.itnetwork.dto.InvoiceDTO;
+import cz.itnetwork.dto.PaginatedResponse;
 import cz.itnetwork.dto.PersonDTO;
 
 import java.util.List;
@@ -49,7 +50,7 @@ public interface PersonService {
      *
      * @return List of all person DTOs
      */
-    List<PersonDTO> getAll();
+    PaginatedResponse<PersonDTO> getPersons(Map<String, String> params);
 
     /**
      * Retrieves sales invoices for a specific person.

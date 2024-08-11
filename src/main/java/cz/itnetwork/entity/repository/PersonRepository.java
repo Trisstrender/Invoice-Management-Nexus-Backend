@@ -1,6 +1,8 @@
 package cz.itnetwork.entity.repository;
 
 import cz.itnetwork.entity.PersonEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -18,4 +20,6 @@ public interface PersonRepository extends JpaRepository<PersonEntity, Long> {
      * @return List of persons with the specified hidden status
      */
     List<PersonEntity> findByHidden(boolean hidden);
+
+    Page<PersonEntity> findByNameContainingAndIdentificationNumberContaining(String name, String identificationNumber, Pageable pageable);
 }
