@@ -52,21 +52,9 @@ public interface PersonService {
      */
     PaginatedResponse<PersonDTO> getPersons(Map<String, String> params);
 
-    /**
-     * Retrieves sales invoices for a specific person.
-     *
-     * @param identificationNumber The identification number of the person
-     * @return List of invoice DTOs representing the person's sales
-     */
-    List<InvoiceDTO> getPersonSales(String identificationNumber);
+    PaginatedResponse<InvoiceDTO> getPersonSales(String identificationNumber, int page, int limit);
 
-    /**
-     * Retrieves purchase invoices for a specific person.
-     *
-     * @param identificationNumber The identification number of the person
-     * @return List of invoice DTOs representing the person's purchases
-     */
-    List<InvoiceDTO> getPersonPurchases(String identificationNumber);
+    PaginatedResponse<InvoiceDTO> getPersonPurchases(String identificationNumber, int page, int limit);
 
     /**
      * Retrieves person statistics.

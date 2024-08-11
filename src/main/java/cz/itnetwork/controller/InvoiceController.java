@@ -96,4 +96,20 @@ public class InvoiceController {
     public Map<String, Object> getInvoiceStatistics() {
         return invoiceService.getInvoiceStatistics();
     }
+
+    @GetMapping("/identification/{identificationNumber}/sales")
+    public PaginatedResponse<InvoiceDTO> getPersonSales(
+            @PathVariable String identificationNumber,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit) {
+        return invoiceService.getPersonSales(identificationNumber, page, limit);
+    }
+
+    @GetMapping("/identification/{identificationNumber}/purchases")
+    public PaginatedResponse<InvoiceDTO> getPersonPurchases(
+            @PathVariable String identificationNumber,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit) {
+        return invoiceService.getPersonPurchases(identificationNumber, page, limit);
+    }
 }

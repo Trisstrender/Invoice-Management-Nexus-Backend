@@ -94,8 +94,11 @@ public class PersonController {
      * @return List of invoice DTOs representing the person's sales
      */
     @GetMapping("/identification/{identificationNumber}/sales")
-    public List<InvoiceDTO> getPersonSales(@PathVariable String identificationNumber) {
-        return personService.getPersonSales(identificationNumber);
+    public PaginatedResponse<InvoiceDTO> getPersonSales(
+            @PathVariable String identificationNumber,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit) {
+        return personService.getPersonSales(identificationNumber, page, limit);
     }
 
     /**
@@ -105,8 +108,11 @@ public class PersonController {
      * @return List of invoice DTOs representing the person's purchases
      */
     @GetMapping("/identification/{identificationNumber}/purchases")
-    public List<InvoiceDTO> getPersonPurchases(@PathVariable String identificationNumber) {
-        return personService.getPersonPurchases(identificationNumber);
+    public PaginatedResponse<InvoiceDTO> getPersonPurchases(
+            @PathVariable String identificationNumber,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit) {
+        return personService.getPersonPurchases(identificationNumber, page, limit);
     }
 
     /**

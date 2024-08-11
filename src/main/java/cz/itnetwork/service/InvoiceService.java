@@ -3,7 +3,6 @@ package cz.itnetwork.service;
 import cz.itnetwork.dto.InvoiceDTO;
 import cz.itnetwork.dto.PaginatedResponse;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -59,19 +58,7 @@ public interface InvoiceService {
      */
     Map<String, Object> getInvoiceStatistics();
 
-    /**
-     * Retrieves sales invoices for a specific person.
-     *
-     * @param identificationNumber The identification number of the person
-     * @return List of invoice DTOs representing the person's sales
-     */
-    List<InvoiceDTO> getPersonSales(String identificationNumber);
+    PaginatedResponse<InvoiceDTO> getPersonSales(String identificationNumber, int page, int limit);
 
-    /**
-     * Retrieves purchase invoices for a specific person.
-     *
-     * @param identificationNumber The identification number of the person
-     * @return List of invoice DTOs representing the person's purchases
-     */
-    List<InvoiceDTO> getPersonPurchases(String identificationNumber);
+    PaginatedResponse<InvoiceDTO> getPersonPurchases(String identificationNumber, int page, int limit);
 }

@@ -13,6 +13,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.webjars.NotFoundException;
 
 import java.util.HashMap;
@@ -150,9 +153,12 @@ public class PersonServiceImpl implements PersonService {
      * @param identificationNumber The identification number of the person
      * @return List of invoice DTOs representing the person's sales
      */
-    @Override
-    public List<InvoiceDTO> getPersonSales(String identificationNumber) {
-        return invoiceService.getPersonSales(identificationNumber);
+    @GetMapping("/identification/{identificationNumber}/sales")
+    public PaginatedResponse<InvoiceDTO> getPersonSales(
+            @PathVariable String identificationNumber,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit) {
+        return invoiceService.getPersonSales(identificationNumber, page, limit);
     }
 
     /**
@@ -161,9 +167,12 @@ public class PersonServiceImpl implements PersonService {
      * @param identificationNumber The identification number of the person
      * @return List of invoice DTOs representing the person's purchases
      */
-    @Override
-    public List<InvoiceDTO> getPersonPurchases(String identificationNumber) {
-        return invoiceService.getPersonPurchases(identificationNumber);
+    @GetMapping("/identification/{identificationNumber}/purchases")
+    public PaginatedResponse<InvoiceDTO> getPersonPurchases(
+            @PathVariable String identificationNumber,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit) {
+        return invoiceService.getPersonPurchases(identificationNumber, page, limit);
     }
 
     /**

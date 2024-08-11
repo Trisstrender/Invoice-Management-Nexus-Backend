@@ -266,9 +266,9 @@ public class InvoiceServiceImpl implements InvoiceService {
      * @return List of invoice DTOs representing the person's sales
      */
     @Override
-    public List<InvoiceDTO> getPersonSales(String identificationNumber) {
+    public PaginatedResponse<InvoiceDTO> getPersonSales(String identificationNumber, int page, int limit) {
         List<InvoiceEntity> sales = invoiceRepository.findBySeller_IdentificationNumber(identificationNumber);
-        return sales.stream().map(invoiceMapper::toDTO).collect(Collectors.toList());
+        return paginateInvoices(sales, page, limit);
     }
 
     /**
@@ -278,8 +278,22 @@ public class InvoiceServiceImpl implements InvoiceService {
      * @return List of invoice DTOs representing the person's purchases
      */
     @Override
-    public List<InvoiceDTO> getPersonPurchases(String identificationNumber) {
+    public PaginatedResponse<InvoiceDTO> getPersonPurchases(String identificationNumber, int page, int limit) {
         List<InvoiceEntity> purchases = invoiceRepository.findByBuyer_IdentificationNumber(identificationNumber);
-        return purchases.stream().map(invoiceMapper::toDTO).collect(Collectors.toList());
+        return paginateInvoices(purchases, page, limit);
+    }
+
+    private PaginatedResponse<InvoiceDTO> paginateInvoices(List<InvoiceEntity> invoices, int page, int limit) {
+        int totalItems = invoices.size();
+        int totalPages = (int) Math.ceil((double) totalItems / limit);
+
+        int fromIndex = (page - 1) * limit;
+        int toIndex = Math.min(fromIndex + limit, totalItems);
+
+        List<InvoiceDTO> paginatedInvoices = invoices.subList(fromIndex, toIndex).stream()
+                .map(invoiceMapper::toDTO)
+                .collect(Collectors.toList());
+
+        return new PaginatedResponse<>(paginatedInvoices, page, totalPages, totalItems);
     }
 }
