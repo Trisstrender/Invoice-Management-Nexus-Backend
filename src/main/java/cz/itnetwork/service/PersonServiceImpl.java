@@ -7,26 +7,20 @@ import cz.itnetwork.dto.mapper.PersonMapper;
 import cz.itnetwork.entity.InvoiceEntity;
 import cz.itnetwork.entity.PersonEntity;
 import cz.itnetwork.entity.repository.PersonRepository;
+import cz.itnetwork.exception.PersonNotFoundException;
+import cz.itnetwork.utils.FilterUtils;
+import cz.itnetwork.utils.PaginationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.webjars.NotFoundException;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * Implementation of the PersonService interface.
- * This class provides the business logic for person-related operations.
- */
 @Service
 public class PersonServiceImpl implements PersonService {
 
@@ -39,12 +33,6 @@ public class PersonServiceImpl implements PersonService {
     @Autowired
     private InvoiceService invoiceService;
 
-    /**
-     * Adds a new person.
-     *
-     * @param personDTO The person data to add
-     * @return The added person DTO
-     */
     @Override
     public PersonDTO addPerson(PersonDTO personDTO) {
         PersonEntity entity = personMapper.toEntity(personDTO);
@@ -52,38 +40,18 @@ public class PersonServiceImpl implements PersonService {
         return personMapper.toDTO(entity);
     }
 
-    /**
-     * Retrieves a person by their ID.
-     *
-     * @param id The ID of the person to retrieve
-     * @return The retrieved person DTO
-     * @throws NotFoundException if the person is not found
-     */
     @Override
     public PersonDTO getPersonById(long id) {
         PersonEntity personEntity = fetchPersonById(id);
         return personMapper.toDTO(personEntity);
     }
 
-    /**
-     * Updates an existing person.
-     * This method creates a new person entity and hides the old one to maintain historical data.
-     * This approach ensures that existing invoices continue to reference the correct person data,
-     * while allowing for updates to person information for future use.
-     *
-     * @param id        The ID of the person to update
-     * @param personDTO The updated person data
-     * @return The updated person DTO
-     * @throws NotFoundException if the person is not found
-     */
     @Override
     public PersonDTO updatePerson(long id, PersonDTO personDTO) {
-        // Set existing person as hidden and save
         PersonEntity existingPerson = fetchPersonById(id);
         existingPerson.setHidden(true);
         personRepository.save(existingPerson);
 
-        // Create and save a new person entity from DTO
         PersonEntity newPerson = personMapper.toEntity(personDTO);
         newPerson.setId(0); // Ensure a new entity is created
         newPerson = personRepository.save(newPerson);
@@ -91,49 +59,19 @@ public class PersonServiceImpl implements PersonService {
         return personMapper.toDTO(newPerson);
     }
 
-    /**
-     * Removes a person by their ID.
-     * This method actually hides the person instead of deleting them to maintain historical data.
-     *
-     * @param id The ID of the person to remove
-     */
     @Override
     public void removePerson(long id) {
-        try {
-            PersonEntity person = fetchPersonById(id);
-            person.setHidden(true);
-            personRepository.save(person);
-        } catch (NotFoundException ignored) {
-            // Do nothing if person not found
-        }
+        PersonEntity person = fetchPersonById(id);
+        person.setHidden(true);
+        personRepository.save(person);
     }
 
-    /**
-     * Retrieves all non-hidden persons.
-     *
-     * @return List of all non-hidden person DTOs
-     */
     @Override
     public PaginatedResponse<PersonDTO> getPersons(Map<String, String> params) {
-        int page = Integer.parseInt(params.getOrDefault("page", "1"));
-        int limit = Integer.parseInt(params.getOrDefault("limit", "10"));
-        String sortParam = params.getOrDefault("sort", "id,asc");
-        String[] sortParams = sortParam.split(",");
-        String sortField = sortParams[0];
-        Sort.Direction sortDirection = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")
-                ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PaginationUtils.createPageable(params);
+        Specification<PersonEntity> spec = FilterUtils.createPersonSpecification(params);
 
-        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by(sortDirection, sortField));
-
-        Page<PersonEntity> personPage;
-
-        if (params.containsKey("name") || params.containsKey("identificationNumber")) {
-            String name = params.getOrDefault("name", "");
-            String identificationNumber = params.getOrDefault("identificationNumber", "");
-            personPage = personRepository.findByNameContainingAndIdentificationNumberContainingAndHiddenFalse(name, identificationNumber, pageable);
-        } else {
-            personPage = personRepository.findByHiddenFalse(pageable);
-        }
+        Page<PersonEntity> personPage = personRepository.findAll(spec, pageable);
 
         List<PersonDTO> personDTOs = personPage.getContent().stream()
                 .map(personMapper::toDTO)
@@ -147,40 +85,16 @@ public class PersonServiceImpl implements PersonService {
         );
     }
 
-    /**
-     * Retrieves sales invoices for a specific person.
-     *
-     * @param identificationNumber The identification number of the person
-     * @return List of invoice DTOs representing the person's sales
-     */
-    @GetMapping("/identification/{identificationNumber}/sales")
-    public PaginatedResponse<InvoiceDTO> getPersonSales(
-            @PathVariable String identificationNumber,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int limit) {
+    @Override
+    public PaginatedResponse<InvoiceDTO> getPersonSales(String identificationNumber, int page, int limit) {
         return invoiceService.getPersonSales(identificationNumber, page, limit);
     }
 
-    /**
-     * Retrieves purchase invoices for a specific person.
-     *
-     * @param identificationNumber The identification number of the person
-     * @return List of invoice DTOs representing the person's purchases
-     */
-    @GetMapping("/identification/{identificationNumber}/purchases")
-    public PaginatedResponse<InvoiceDTO> getPersonPurchases(
-            @PathVariable String identificationNumber,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int limit) {
+    @Override
+    public PaginatedResponse<InvoiceDTO> getPersonPurchases(String identificationNumber, int page, int limit) {
         return invoiceService.getPersonPurchases(identificationNumber, page, limit);
     }
 
-    /**
-     * Retrieves person statistics.
-     * This method calculates the total revenue for each person based on their sales.
-     *
-     * @return List of maps containing person statistics (personId, personName, revenue)
-     */
     @Override
     public List<Map<String, Object>> getPersonStatistics() {
         return personRepository.findAll().stream()
@@ -195,15 +109,8 @@ public class PersonServiceImpl implements PersonService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Helper method to fetch a person by ID.
-     *
-     * @param id The ID of the person to fetch
-     * @return The PersonEntity
-     * @throws NotFoundException if the person is not found
-     */
     private PersonEntity fetchPersonById(long id) {
         return personRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Person with id " + id + " wasn't found in the database."));
+                .orElseThrow(() -> new PersonNotFoundException("Person with id " + id + " wasn't found in the database."));
     }
 }
