@@ -1,8 +1,8 @@
 package cz.itnetwork.utils;
 
+import cz.itnetwork.constant.Countries;
 import cz.itnetwork.dto.InvoiceDTO;
 import cz.itnetwork.dto.PersonDTO;
-import cz.itnetwork.constant.Countries;
 
 import java.time.LocalDate;
 

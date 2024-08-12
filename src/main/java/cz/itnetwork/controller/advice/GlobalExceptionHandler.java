@@ -1,15 +1,15 @@
 package cz.itnetwork.controller.advice;
 
+import cz.itnetwork.dto.ErrorResponse;
 import cz.itnetwork.exception.InvoiceNotFoundException;
 import cz.itnetwork.exception.PersonNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import jakarta.validation.ConstraintViolationException;
-import cz.itnetwork.dto.ErrorResponse;
 
 import java.util.stream.Collectors;
 

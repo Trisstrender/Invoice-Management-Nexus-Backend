@@ -2,6 +2,7 @@ package cz.itnetwork.validation;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
+
 import java.lang.annotation.*;
 
 @Documented
@@ -10,6 +11,8 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidDueDate {
     String message() default "Due date must be after the issue date";
+
     Class<?>[] groups() default {};
+
     Class<? extends Payload>[] payload() default {};
 }

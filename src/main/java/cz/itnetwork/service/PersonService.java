@@ -9,11 +9,18 @@ import java.util.Map;
 
 public interface PersonService {
     PersonDTO addPerson(PersonDTO personDTO);
+
     PersonDTO getPersonById(long id);
+
     PersonDTO updatePerson(long id, PersonDTO personDTO);
+
     void removePerson(long id);
+
     PaginatedResponse<PersonDTO> getPersons(Map<String, String> params);
+
     PaginatedResponse<InvoiceDTO> getPersonSales(String identificationNumber, int page, int limit);
+
     PaginatedResponse<InvoiceDTO> getPersonPurchases(String identificationNumber, int page, int limit);
+
     List<Map<String, Object>> getPersonStatistics();
 }

@@ -8,5 +8,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface InvoiceRepository extends JpaRepository<InvoiceEntity, Long>, JpaSpecificationExecutor<InvoiceEntity> {
     Page<InvoiceEntity> findBySeller_IdentificationNumber(String identificationNumber, Pageable pageable);
+
     Page<InvoiceEntity> findByBuyer_IdentificationNumber(String identificationNumber, Pageable pageable);
 }
