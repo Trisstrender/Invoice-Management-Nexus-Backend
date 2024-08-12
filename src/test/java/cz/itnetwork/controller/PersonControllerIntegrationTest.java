@@ -1,6 +1,7 @@
 package cz.itnetwork.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import cz.itnetwork.dto.PaginatedResponse;
 import cz.itnetwork.dto.PersonDTO;
 import cz.itnetwork.service.PersonService;
 import cz.itnetwork.utils.TestDataFactory;
@@ -11,6 +12,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -99,5 +105,46 @@ class PersonControllerIntegrationTest {
 
         mockMvc.perform(delete("/api/persons/{id}", personId))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void getPersons_ReturnsPagedResult() throws Exception {
+        PaginatedResponse<PersonDTO> mockResponse = new PaginatedResponse<>(
+                Collections.singletonList(TestDataFactory.createValidPersonDTO()),
+                1, 1, 1
+        );
+
+        when(personService.getPersons(any())).thenReturn(mockResponse);
+
+        mockMvc.perform(get("/api/persons")
+                        .param("page", "1")
+                        .param("limit", "10")
+                        .param("sort", "name,asc"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.currentPage").value(1))
+                .andExpect(jsonPath("$.totalPages").value(1))
+                .andExpect(jsonPath("$.totalItems").value(1))
+                .andExpect(jsonPath("$.items").isArray())
+                .andExpect(jsonPath("$.items[0].name").exists());
+    }
+
+    @Test
+    void getPersonStatistics_ReturnsCorrectStatistics() throws Exception {
+        List<Map<String, Object>> mockStatistics = Arrays.asList(
+                Map.of("personId", 1L, "personName", "Person 1", "revenue", 1000L),
+                Map.of("personId", 2L, "personName", "Person 2", "revenue", 2000L)
+        );
+
+        when(personService.getPersonStatistics()).thenReturn(mockStatistics);
+
+        mockMvc.perform(get("/api/persons/statistics"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].personId").value(1))
+                .andExpect(jsonPath("$[0].personName").value("Person 1"))
+                .andExpect(jsonPath("$[0].revenue").value(1000))
+                .andExpect(jsonPath("$[1].personId").value(2))
+                .andExpect(jsonPath("$[1].personName").value("Person 2"))
+                .andExpect(jsonPath("$[1].revenue").value(2000));
     }
 }

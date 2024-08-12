@@ -1,7 +1,9 @@
 package cz.itnetwork.service;
 
+import cz.itnetwork.dto.PaginatedResponse;
 import cz.itnetwork.dto.PersonDTO;
 import cz.itnetwork.dto.mapper.PersonMapper;
+import cz.itnetwork.entity.InvoiceEntity;
 import cz.itnetwork.entity.PersonEntity;
 import cz.itnetwork.entity.repository.PersonRepository;
 import cz.itnetwork.exception.PersonNotFoundException;
@@ -13,8 +15,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -110,5 +116,57 @@ class PersonServiceImplTest {
 
         assertTrue(existingEntity.isHidden());
         verify(personRepository).save(existingEntity);
+    }
+    @Test
+    void getPersons_ReturnsPagedResult() {
+        Map<String, String> params = new HashMap<>();
+        params.put("page", "1");
+        params.put("limit", "10");
+        params.put("sort", "name,asc");
+
+        Page<PersonEntity> mockPage = new PageImpl<>(Collections.singletonList(new PersonEntity()));
+        when(personRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(mockPage);
+        when(personMapper.toDTO(any(PersonEntity.class))).thenReturn(new PersonDTO());
+
+        PaginatedResponse<PersonDTO> result = personService.getPersons(params);
+
+        assertNotNull(result);
+        assertEquals(1, result.getCurrentPage());
+        assertEquals(1, result.getTotalPages());
+        assertEquals(1, result.getTotalItems());
+        assertFalse(result.getItems().isEmpty());
+    }
+
+    @Test
+    void getPersonStatistics_ReturnsCorrectStatistics() {
+        PersonEntity person1 = new PersonEntity();
+        person1.setId(1L);
+        person1.setName("Person 1");
+        person1.setSales(Arrays.asList(
+                createInvoiceEntity(100L),
+                createInvoiceEntity(200L)
+        ));
+
+        PersonEntity person2 = new PersonEntity();
+        person2.setId(2L);
+        person2.setName("Person 2");
+        person2.setSales(Collections.singletonList(
+                createInvoiceEntity(300L)
+        ));
+
+        when(personRepository.findAll()).thenReturn(Arrays.asList(person1, person2));
+
+        List<Map<String, Object>> result = personService.getPersonStatistics();
+
+        assertEquals(2, result.size());
+        assertEquals(300L, result.get(0).get("revenue"));
+        assertEquals(300L, result.get(1).get("revenue"));
+    }
+
+    // Helper method for creating InvoiceEntity
+    private InvoiceEntity createInvoiceEntity(Long price) {
+        InvoiceEntity invoice = new InvoiceEntity();
+        invoice.setPrice(price);
+        return invoice;
     }
 }

@@ -105,17 +105,18 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     public Map<String, Object> getInvoiceStatistics() {
         long currentYear = LocalDate.now().getYear();
+        List<InvoiceEntity> allInvoices = invoiceRepository.findAll();
 
-        long currentYearSum = invoiceRepository.findAll().stream()
+        long currentYearSum = allInvoices.stream()
                 .filter(invoice -> invoice.getIssued().getYear() == currentYear)
                 .mapToLong(InvoiceEntity::getPrice)
                 .sum();
 
-        long allTimeSum = invoiceRepository.findAll().stream()
+        long allTimeSum = allInvoices.stream()
                 .mapToLong(InvoiceEntity::getPrice)
                 .sum();
 
-        long invoicesCount = invoiceRepository.count();
+        long invoicesCount = allInvoices.size();
 
         Map<String, Object> statistics = new HashMap<>();
         statistics.put("currentYearSum", currentYearSum);
