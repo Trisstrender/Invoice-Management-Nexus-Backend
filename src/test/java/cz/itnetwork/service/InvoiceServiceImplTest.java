@@ -12,9 +12,7 @@ import cz.itnetwork.utils.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -26,6 +24,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -41,12 +40,11 @@ class InvoiceServiceImplTest {
     @Mock
     private InvoiceMapper invoiceMapper;
 
-    @InjectMocks
     private InvoiceServiceImpl invoiceService;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        invoiceService = new InvoiceServiceImpl(invoiceRepository, invoiceMapper, personRepository);
     }
 
     @Test
@@ -107,6 +105,7 @@ class InvoiceServiceImplTest {
 
         assertNotNull(result);
         assertEquals(invoiceId, result.getId());
+        verify(invoiceRepository).save(any(InvoiceEntity.class));
     }
 
     @Test
@@ -156,6 +155,7 @@ class InvoiceServiceImplTest {
         invoice3.setPrice(300L);
 
         List<InvoiceEntity> mockInvoices = Arrays.asList(invoice1, invoice2, invoice3);
+
         when(invoiceRepository.findAll()).thenReturn(mockInvoices);
 
         Map<String, Object> result = invoiceService.getInvoiceStatistics();
@@ -164,7 +164,46 @@ class InvoiceServiceImplTest {
         assertEquals(600L, result.get("allTimeSum"));
         assertEquals(3L, result.get("invoicesCount"));
 
-        // Verify that findAll was called
         verify(invoiceRepository).findAll();
+    }
+
+    @Test
+    void getPersonSales_ReturnsPagedResult() {
+        String identificationNumber = "12345678";
+        int page = 1;
+        int limit = 10;
+        Page<InvoiceEntity> mockPage = new PageImpl<>(Collections.singletonList(new InvoiceEntity()));
+
+        when(invoiceRepository.findBySeller_IdentificationNumber(eq(identificationNumber), any(Pageable.class)))
+                .thenReturn(mockPage);
+        when(invoiceMapper.toDTO(any(InvoiceEntity.class))).thenReturn(new InvoiceDTO());
+
+        PaginatedResponse<InvoiceDTO> result = invoiceService.getPersonSales(identificationNumber, page, limit);
+
+        assertNotNull(result);
+        assertEquals(1, result.getCurrentPage());
+        assertEquals(1, result.getTotalPages());
+        assertEquals(1, result.getTotalItems());
+        assertFalse(result.getItems().isEmpty());
+    }
+
+    @Test
+    void getPersonPurchases_ReturnsPagedResult() {
+        String identificationNumber = "12345678";
+        int page = 1;
+        int limit = 10;
+        Page<InvoiceEntity> mockPage = new PageImpl<>(Collections.singletonList(new InvoiceEntity()));
+
+        when(invoiceRepository.findByBuyer_IdentificationNumber(eq(identificationNumber), any(Pageable.class)))
+                .thenReturn(mockPage);
+        when(invoiceMapper.toDTO(any(InvoiceEntity.class))).thenReturn(new InvoiceDTO());
+
+        PaginatedResponse<InvoiceDTO> result = invoiceService.getPersonPurchases(identificationNumber, page, limit);
+
+        assertNotNull(result);
+        assertEquals(1, result.getCurrentPage());
+        assertEquals(1, result.getTotalPages());
+        assertEquals(1, result.getTotalItems());
+        assertFalse(result.getItems().isEmpty());
     }
 }

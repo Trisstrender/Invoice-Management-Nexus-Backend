@@ -10,7 +10,6 @@ import cz.itnetwork.entity.repository.PersonRepository;
 import cz.itnetwork.exception.PersonNotFoundException;
 import cz.itnetwork.utils.FilterUtils;
 import cz.itnetwork.utils.PaginationUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -22,48 +21,55 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-public class PersonServiceImpl implements PersonService {
+public class PersonServiceImpl extends BaseService<PersonEntity, Long> implements PersonService {
 
-    @Autowired
-    private PersonMapper personMapper;
+    private final PersonRepository personRepository;
+    private final PersonMapper personMapper;
+    private final InvoiceService invoiceService;
 
-    @Autowired
-    private PersonRepository personRepository;
-
-    @Autowired
-    private InvoiceService invoiceService;
+    public PersonServiceImpl(PersonRepository personRepository,
+                             PersonMapper personMapper,
+                             InvoiceService invoiceService) {
+        super(personRepository, personRepository);
+        this.personRepository = personRepository;
+        this.personMapper = personMapper;
+        this.invoiceService = invoiceService;
+    }
 
     @Override
     public PersonDTO addPerson(PersonDTO personDTO) {
         PersonEntity entity = personMapper.toEntity(personDTO);
-        entity = personRepository.save(entity);
+        entity = create(entity);
         return personMapper.toDTO(entity);
     }
 
     @Override
     public PersonDTO getPersonById(long id) {
-        PersonEntity personEntity = fetchPersonById(id);
+        PersonEntity personEntity = findById(id)
+                .orElseThrow(() -> new PersonNotFoundException("Person not found"));
         return personMapper.toDTO(personEntity);
     }
 
     @Override
     public PersonDTO updatePerson(long id, PersonDTO personDTO) {
-        PersonEntity existingPerson = fetchPersonById(id);
+        PersonEntity existingPerson = findById(id)
+                .orElseThrow(() -> new PersonNotFoundException("Person not found"));
         existingPerson.setHidden(true);
-        personRepository.save(existingPerson);
+        update(existingPerson);
 
         PersonEntity newPerson = personMapper.toEntity(personDTO);
         newPerson.setId(0); // Ensure a new entity is created
-        newPerson = personRepository.save(newPerson);
+        newPerson = create(newPerson);
 
         return personMapper.toDTO(newPerson);
     }
 
     @Override
     public void removePerson(long id) {
-        PersonEntity person = fetchPersonById(id);
+        PersonEntity person = findById(id)
+                .orElseThrow(() -> new PersonNotFoundException("Person not found"));
         person.setHidden(true);
-        personRepository.save(person);
+        update(person);
     }
 
     @Override
@@ -71,7 +77,7 @@ public class PersonServiceImpl implements PersonService {
         Pageable pageable = PaginationUtils.createPageable(params);
         Specification<PersonEntity> spec = FilterUtils.createPersonSpecification(params);
 
-        Page<PersonEntity> personPage = personRepository.findAll(spec, pageable);
+        Page<PersonEntity> personPage = findAll(spec, pageable);
 
         List<PersonDTO> personDTOs = personPage.getContent().stream()
                 .map(personMapper::toDTO)
@@ -107,10 +113,5 @@ public class PersonServiceImpl implements PersonService {
                     return statistics;
                 })
                 .collect(Collectors.toList());
-    }
-
-    private PersonEntity fetchPersonById(long id) {
-        return personRepository.findById(id)
-                .orElseThrow(() -> new PersonNotFoundException("Person with id " + id + " wasn't found in the database."));
     }
 }

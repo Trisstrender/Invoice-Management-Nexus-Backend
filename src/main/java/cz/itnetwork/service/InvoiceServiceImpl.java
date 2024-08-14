@@ -10,7 +10,6 @@ import cz.itnetwork.exception.InvoiceNotFoundException;
 import cz.itnetwork.exception.PersonNotFoundException;
 import cz.itnetwork.utils.FilterUtils;
 import cz.itnetwork.utils.PaginationUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,16 +23,20 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-public class InvoiceServiceImpl implements InvoiceService {
+public class InvoiceServiceImpl extends BaseService<InvoiceEntity, Long> implements InvoiceService {
 
-    @Autowired
-    private InvoiceRepository invoiceRepository;
+    private final InvoiceRepository invoiceRepository;
+    private final InvoiceMapper invoiceMapper;
+    private final PersonRepository personRepository;
 
-    @Autowired
-    private PersonRepository personRepository;
-
-    @Autowired
-    private InvoiceMapper invoiceMapper;
+    public InvoiceServiceImpl(InvoiceRepository invoiceRepository,
+                              InvoiceMapper invoiceMapper,
+                              PersonRepository personRepository) {
+        super(invoiceRepository, invoiceRepository);
+        this.invoiceRepository = invoiceRepository;
+        this.invoiceMapper = invoiceMapper;
+        this.personRepository = personRepository;
+    }
 
     @Override
     public InvoiceDTO createInvoice(InvoiceDTO invoiceDTO) {
@@ -45,7 +48,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         entity.setSeller(personRepository.findById(invoiceDTO.getSeller().getId())
                 .orElseThrow(() -> new PersonNotFoundException("Seller not found")));
 
-        entity = invoiceRepository.save(entity);
+        entity = create(entity);
         return invoiceMapper.toDTO(entity);
     }
 
@@ -54,7 +57,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         Pageable pageable = PaginationUtils.createPageable(params);
         Specification<InvoiceEntity> spec = FilterUtils.createInvoiceSpecification(params);
 
-        Page<InvoiceEntity> invoicePage = invoiceRepository.findAll(spec, pageable);
+        Page<InvoiceEntity> invoicePage = findAll(spec, pageable);
 
         List<InvoiceDTO> invoiceDTOs = invoicePage.getContent().stream()
                 .map(invoiceMapper::toDTO)
@@ -70,14 +73,14 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Override
     public InvoiceDTO getInvoiceById(long id) {
-        InvoiceEntity entity = invoiceRepository.findById(id)
+        InvoiceEntity entity = findById(id)
                 .orElseThrow(() -> new InvoiceNotFoundException("Invoice not found"));
         return invoiceMapper.toDTO(entity);
     }
 
     @Override
     public InvoiceDTO updateInvoice(long id, InvoiceDTO invoiceDTO) {
-        InvoiceEntity existingInvoice = invoiceRepository.findById(id)
+        InvoiceEntity existingInvoice = findById(id)
                 .orElseThrow(() -> new InvoiceNotFoundException("Invoice not found"));
 
         invoiceMapper.updateEntityFromDto(invoiceDTO, existingInvoice);
@@ -92,14 +95,14 @@ public class InvoiceServiceImpl implements InvoiceService {
                     .orElseThrow(() -> new PersonNotFoundException("Seller not found")));
         }
 
-        existingInvoice = invoiceRepository.save(existingInvoice);
+        existingInvoice = update(existingInvoice);
 
         return invoiceMapper.toDTO(existingInvoice);
     }
 
     @Override
     public void deleteInvoice(long id) {
-        invoiceRepository.deleteById(id);
+        delete(id);
     }
 
     @Override

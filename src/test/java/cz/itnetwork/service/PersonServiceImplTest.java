@@ -1,5 +1,6 @@
 package cz.itnetwork.service;
 
+import cz.itnetwork.dto.InvoiceDTO;
 import cz.itnetwork.dto.PaginatedResponse;
 import cz.itnetwork.dto.PersonDTO;
 import cz.itnetwork.dto.mapper.PersonMapper;
@@ -11,9 +12,7 @@ import cz.itnetwork.utils.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -35,12 +34,14 @@ class PersonServiceImplTest {
     @Mock
     private PersonMapper personMapper;
 
-    @InjectMocks
+    @Mock
+    private InvoiceService invoiceService;
+
     private PersonServiceImpl personService;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        personService = new PersonServiceImpl(personRepository, personMapper, invoiceService);
     }
 
     @Test
@@ -89,7 +90,7 @@ class PersonServiceImplTest {
         long personId = 1L;
         PersonDTO inputDTO = TestDataFactory.createValidPersonDTO();
         PersonEntity existingEntity = new PersonEntity();
-        PersonEntity updatedEntity = new PersonEntity(); // Create a new entity to represent the updated person
+        PersonEntity updatedEntity = new PersonEntity();
         PersonDTO updatedDTO = TestDataFactory.createValidPersonDTO();
         updatedDTO.setId(personId);
 
@@ -102,7 +103,7 @@ class PersonServiceImplTest {
 
         assertNotNull(result);
         assertEquals(personId, result.getId());
-        verify(personRepository, times(2)).save(any(PersonEntity.class)); // Verify two saves: one for hiding, one for new entity
+        verify(personRepository, times(2)).save(any(PersonEntity.class));
     }
 
     @Test
@@ -117,6 +118,7 @@ class PersonServiceImplTest {
         assertTrue(existingEntity.isHidden());
         verify(personRepository).save(existingEntity);
     }
+
     @Test
     void getPersons_ReturnsPagedResult() {
         Map<String, String> params = new HashMap<>();
@@ -129,6 +131,48 @@ class PersonServiceImplTest {
         when(personMapper.toDTO(any(PersonEntity.class))).thenReturn(new PersonDTO());
 
         PaginatedResponse<PersonDTO> result = personService.getPersons(params);
+
+        assertNotNull(result);
+        assertEquals(1, result.getCurrentPage());
+        assertEquals(1, result.getTotalPages());
+        assertEquals(1, result.getTotalItems());
+        assertFalse(result.getItems().isEmpty());
+    }
+
+    @Test
+    void getPersonSales_ReturnsPagedResult() {
+        String identificationNumber = "12345678";
+        int page = 1;
+        int limit = 10;
+        PaginatedResponse<InvoiceDTO> mockResponse = new PaginatedResponse<>(
+                Collections.singletonList(new InvoiceDTO()),
+                1, 1, 1
+        );
+
+        when(invoiceService.getPersonSales(identificationNumber, page, limit)).thenReturn(mockResponse);
+
+        PaginatedResponse<InvoiceDTO> result = personService.getPersonSales(identificationNumber, page, limit);
+
+        assertNotNull(result);
+        assertEquals(1, result.getCurrentPage());
+        assertEquals(1, result.getTotalPages());
+        assertEquals(1, result.getTotalItems());
+        assertFalse(result.getItems().isEmpty());
+    }
+
+    @Test
+    void getPersonPurchases_ReturnsPagedResult() {
+        String identificationNumber = "12345678";
+        int page = 1;
+        int limit = 10;
+        PaginatedResponse<InvoiceDTO> mockResponse = new PaginatedResponse<>(
+                Collections.singletonList(new InvoiceDTO()),
+                1, 1, 1
+        );
+
+        when(invoiceService.getPersonPurchases(identificationNumber, page, limit)).thenReturn(mockResponse);
+
+        PaginatedResponse<InvoiceDTO> result = personService.getPersonPurchases(identificationNumber, page, limit);
 
         assertNotNull(result);
         assertEquals(1, result.getCurrentPage());
@@ -154,13 +198,21 @@ class PersonServiceImplTest {
                 createInvoiceEntity(300L)
         ));
 
-        when(personRepository.findAll()).thenReturn(Arrays.asList(person1, person2));
+        List<PersonEntity> mockPersons = Arrays.asList(person1, person2);
+
+        when(personRepository.findAll()).thenReturn(mockPersons);
 
         List<Map<String, Object>> result = personService.getPersonStatistics();
 
         assertEquals(2, result.size());
         assertEquals(300L, result.get(0).get("revenue"));
         assertEquals(300L, result.get(1).get("revenue"));
+        assertEquals(1L, result.get(0).get("personId"));
+        assertEquals("Person 1", result.get(0).get("personName"));
+        assertEquals(2L, result.get(1).get("personId"));
+        assertEquals("Person 2", result.get(1).get("personName"));
+
+        verify(personRepository).findAll();
     }
 
     // Helper method for creating InvoiceEntity
