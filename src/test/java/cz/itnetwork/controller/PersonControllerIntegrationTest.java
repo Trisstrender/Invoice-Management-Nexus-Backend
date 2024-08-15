@@ -3,6 +3,7 @@ package cz.itnetwork.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.itnetwork.dto.PaginatedResponse;
 import cz.itnetwork.dto.PersonDTO;
+import cz.itnetwork.dto.PersonStatisticsDTO;
 import cz.itnetwork.service.PersonService;
 import cz.itnetwork.utils.TestDataFactory;
 import org.junit.jupiter.api.Test;
@@ -15,8 +16,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -129,22 +128,31 @@ class PersonControllerIntegrationTest {
     }
 
     @Test
-    void getPersonStatistics_ReturnsCorrectStatistics() throws Exception {
-        List<Map<String, Object>> mockStatistics = Arrays.asList(
-                Map.of("personId", 1L, "personName", "Person 1", "revenue", 1000L),
-                Map.of("personId", 2L, "personName", "Person 2", "revenue", 2000L)
+    void getPersonStatistics_ReturnsPagedResult() throws Exception {
+        PersonStatisticsDTO stat1 = new PersonStatisticsDTO(1L, "Person 1", 1000L);
+        PersonStatisticsDTO stat2 = new PersonStatisticsDTO(2L, "Person 2", 2000L);
+
+        PaginatedResponse<PersonStatisticsDTO> mockResponse = new PaginatedResponse<>(
+                Arrays.asList(stat1, stat2),
+                1, 1, 2
         );
 
-        when(personService.getPersonStatistics()).thenReturn(mockStatistics);
+        when(personService.getPersonStatistics(eq(1), eq(10), eq("name,asc"))).thenReturn(mockResponse);
 
-        mockMvc.perform(get("/api/persons/statistics"))
+        mockMvc.perform(get("/api/persons/statistics")
+                        .param("page", "1")
+                        .param("limit", "10")
+                        .param("sort", "name,asc"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$[0].personId").value(1))
-                .andExpect(jsonPath("$[0].personName").value("Person 1"))
-                .andExpect(jsonPath("$[0].revenue").value(1000))
-                .andExpect(jsonPath("$[1].personId").value(2))
-                .andExpect(jsonPath("$[1].personName").value("Person 2"))
-                .andExpect(jsonPath("$[1].revenue").value(2000));
+                .andExpect(jsonPath("$.currentPage").value(1))
+                .andExpect(jsonPath("$.totalPages").value(1))
+                .andExpect(jsonPath("$.totalItems").value(2))
+                .andExpect(jsonPath("$.items").isArray())
+                .andExpect(jsonPath("$.items[0].personId").value(1))
+                .andExpect(jsonPath("$.items[0].personName").value("Person 1"))
+                .andExpect(jsonPath("$.items[0].revenue").value(1000))
+                .andExpect(jsonPath("$.items[1].personId").value(2))
+                .andExpect(jsonPath("$.items[1].personName").value("Person 2"))
+                .andExpect(jsonPath("$.items[1].revenue").value(2000));
     }
 }

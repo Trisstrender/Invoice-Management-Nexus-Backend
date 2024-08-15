@@ -3,6 +3,7 @@ package cz.itnetwork.service;
 import cz.itnetwork.dto.InvoiceDTO;
 import cz.itnetwork.dto.PaginatedResponse;
 import cz.itnetwork.dto.PersonDTO;
+import cz.itnetwork.dto.PersonStatisticsDTO;
 import cz.itnetwork.dto.mapper.PersonMapper;
 import cz.itnetwork.entity.InvoiceEntity;
 import cz.itnetwork.entity.PersonEntity;
@@ -182,7 +183,11 @@ class PersonServiceImplTest {
     }
 
     @Test
-    void getPersonStatistics_ReturnsCorrectStatistics() {
+    void getPersonStatistics_ReturnsPagedResult() {
+        int page = 1;
+        int limit = 10;
+        String sort = "name,asc";
+
         PersonEntity person1 = new PersonEntity();
         person1.setId(1L);
         person1.setName("Person 1");
@@ -198,19 +203,88 @@ class PersonServiceImplTest {
                 createInvoiceEntity(300L)
         ));
 
-        List<PersonEntity> mockPersons = Arrays.asList(person1, person2);
+        PersonEntity personWithZeroRevenue = new PersonEntity();
+        personWithZeroRevenue.setId(3L);
+        personWithZeroRevenue.setName("Person 3");
+        personWithZeroRevenue.setSales(Collections.emptyList());
 
-        when(personRepository.findAll()).thenReturn(mockPersons);
+        List<PersonEntity> personList = Arrays.asList(person2, person1, personWithZeroRevenue);
 
-        List<Map<String, Object>> result = personService.getPersonStatistics();
+        when(personRepository.findAll()).thenReturn(personList);
 
-        assertEquals(2, result.size());
-        assertEquals(300L, result.get(0).get("revenue"));
-        assertEquals(300L, result.get(1).get("revenue"));
-        assertEquals(1L, result.get(0).get("personId"));
-        assertEquals("Person 1", result.get(0).get("personName"));
-        assertEquals(2L, result.get(1).get("personId"));
-        assertEquals("Person 2", result.get(1).get("personName"));
+        PaginatedResponse<PersonStatisticsDTO> result = personService.getPersonStatistics(page, limit, sort);
+
+        assertNotNull(result);
+        assertEquals(1, result.getCurrentPage());
+        assertEquals(1, result.getTotalPages());
+        assertEquals(2, result.getTotalItems());
+        assertEquals(2, result.getItems().size());
+
+        assertEquals(1L, result.getItems().get(0).getPersonId());
+        assertEquals("Person 1", result.getItems().get(0).getPersonName());
+        assertEquals(300L, result.getItems().get(0).getRevenue());
+
+        assertEquals(2L, result.getItems().get(1).getPersonId());
+        assertEquals("Person 2", result.getItems().get(1).getPersonName());
+        assertEquals(300L, result.getItems().get(1).getRevenue());
+
+        verify(personRepository).findAll();
+    }
+
+    @Test
+    void getPersonStatistics_SortsCorrectly() {
+        int page = 1;
+        int limit = 10;
+        String sort = "name,desc";
+
+        PersonEntity person1 = new PersonEntity();
+        person1.setId(1L);
+        person1.setName("AAA");
+        person1.setSales(Collections.singletonList(createInvoiceEntity(100L)));
+
+        PersonEntity person2 = new PersonEntity();
+        person2.setId(2L);
+        person2.setName("BBB");
+        person2.setSales(Collections.singletonList(createInvoiceEntity(200L)));
+
+        List<PersonEntity> personList = Arrays.asList(person1, person2);
+
+        when(personRepository.findAll()).thenReturn(personList);
+
+        PaginatedResponse<PersonStatisticsDTO> result = personService.getPersonStatistics(page, limit, sort);
+
+        assertEquals(2, result.getItems().size());
+        assertEquals("BBB", result.getItems().get(0).getPersonName());
+        assertEquals("AAA", result.getItems().get(1).getPersonName());
+    }
+
+    @Test
+    void getPersonStatistics_FiltersZeroRevenue() {
+        int page = 1;
+        int limit = 10;
+        String sort = "name,asc";
+
+        PersonEntity person1 = new PersonEntity();
+        person1.setId(1L);
+        person1.setName("Person 1");
+        person1.setSales(Collections.singletonList(createInvoiceEntity(100L)));
+
+        PersonEntity person2 = new PersonEntity();
+        person2.setId(2L);
+        person2.setName("Person 2");
+        person2.setSales(Collections.emptyList());
+
+        List<PersonEntity> personList = Arrays.asList(person1, person2);
+
+        when(personRepository.findAll()).thenReturn(personList);
+
+        PaginatedResponse<PersonStatisticsDTO> result = personService.getPersonStatistics(page, limit, sort);
+
+        assertEquals(1, result.getItems().size());
+        assertEquals("Person 1", result.getItems().get(0).getPersonName());
+        assertEquals(100L, result.getItems().get(0).getRevenue());
+        assertEquals(1, result.getTotalItems());
+        assertEquals(1, result.getTotalPages());
 
         verify(personRepository).findAll();
     }

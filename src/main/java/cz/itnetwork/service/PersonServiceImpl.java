@@ -1,8 +1,6 @@
 package cz.itnetwork.service;
 
-import cz.itnetwork.dto.InvoiceDTO;
-import cz.itnetwork.dto.PaginatedResponse;
-import cz.itnetwork.dto.PersonDTO;
+import cz.itnetwork.dto.*;
 import cz.itnetwork.dto.mapper.PersonMapper;
 import cz.itnetwork.entity.InvoiceEntity;
 import cz.itnetwork.entity.PersonEntity;
@@ -11,14 +9,11 @@ import cz.itnetwork.exception.PersonNotFoundException;
 import cz.itnetwork.utils.FilterUtils;
 import cz.itnetwork.utils.PaginationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -60,7 +55,7 @@ public class PersonServiceImpl extends BaseService<PersonEntity, Long> implement
         update(existingPerson);
 
         PersonEntity newPerson = personMapper.toEntity(personDTO);
-        newPerson.setId(0); // Ensure a new entity is created
+        newPerson.setId(0);
         newPerson = create(newPerson);
 
         return personMapper.toDTO(newPerson);
@@ -104,16 +99,62 @@ public class PersonServiceImpl extends BaseService<PersonEntity, Long> implement
     }
 
     @Override
-    public List<Map<String, Object>> getPersonStatistics() {
-        return personRepository.findAll().stream()
+    public PaginatedResponse<PersonStatisticsDTO> getPersonStatistics(int page, int limit, String sort) {
+        // Default sort field and direction
+        String sortField = "id";
+        Sort.Direction sortDirection = Sort.Direction.ASC;
+
+        // Parse and validate sort parameters
+        if (sort != null && !sort.isEmpty()) {
+            String[] sortParams = sort.split(",");
+            String requestedSortField = sortParams[0].trim();
+            sortDirection = sortParams.length > 1 && sortParams[1].trim().equalsIgnoreCase("desc")
+                    ? Sort.Direction.DESC : Sort.Direction.ASC;
+
+            Set<String> validSortFields = Set.of("id", "name", "revenue");
+            if (validSortFields.contains(requestedSortField)) {
+                sortField = requestedSortField;
+            }
+        }
+
+        // Fetch all persons
+        List<PersonEntity> allPersons = personRepository.findAll();
+
+        // Map to DTOs and filter
+        List<PersonStatisticsDTO> statistics = allPersons.stream()
                 .map(person -> {
                     long revenue = person.getSales().stream().mapToLong(InvoiceEntity::getPrice).sum();
-                    Map<String, Object> statistics = new HashMap<>();
-                    statistics.put("personId", person.getId());
-                    statistics.put("personName", person.getName());
-                    statistics.put("revenue", revenue);
-                    return statistics;
+                    return new PersonStatisticsDTO(person.getId(), person.getName(), revenue);
                 })
+                .filter(stat -> stat.getRevenue() > 0)  // Filter out people with zero revenue
                 .collect(Collectors.toList());
+
+        // Sort the filtered list using Comparator
+        Comparator<PersonStatisticsDTO> comparator = switch (sortField) {
+            case "name" -> Comparator.comparing(PersonStatisticsDTO::getPersonName, String.CASE_INSENSITIVE_ORDER);
+            case "revenue" -> Comparator.comparingLong(PersonStatisticsDTO::getRevenue);
+            case "id" -> Comparator.comparingLong(PersonStatisticsDTO::getPersonId);
+            default -> throw new IllegalStateException("Unexpected value: " + sortField);
+        };
+        if (sortDirection == Sort.Direction.DESC) {
+            comparator = comparator.reversed();
+        }
+        statistics.sort(comparator);
+
+        // Apply pagination safely
+        int totalItems = statistics.size();
+        int start = Math.max(0, (page - 1) * limit);
+        int end = Math.min(start + limit, totalItems);
+
+        List<PersonStatisticsDTO> paginatedStatistics = start < end ? statistics.subList(start, end) : Collections.emptyList();
+
+        int totalPages = (int) Math.ceil((double) totalItems / limit);
+
+        return new PaginatedResponse<>(
+                paginatedStatistics,
+                page,
+                totalPages,
+                totalItems
+        );
     }
 }

@@ -3,8 +3,8 @@ package cz.itnetwork.service;
 import cz.itnetwork.dto.InvoiceDTO;
 import cz.itnetwork.dto.PaginatedResponse;
 import cz.itnetwork.dto.PersonDTO;
+import cz.itnetwork.dto.PersonStatisticsDTO;
 
-import java.util.List;
 import java.util.Map;
 
 public interface PersonService {
@@ -22,5 +22,5 @@ public interface PersonService {
 
     PaginatedResponse<InvoiceDTO> getPersonPurchases(String identificationNumber, int page, int limit);
 
-    List<Map<String, Object>> getPersonStatistics();
+    PaginatedResponse<PersonStatisticsDTO> getPersonStatistics(int page, int limit, String sort);
 }
