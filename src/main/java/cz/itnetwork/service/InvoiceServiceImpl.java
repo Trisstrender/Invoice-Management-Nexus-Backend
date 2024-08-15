@@ -10,6 +10,7 @@ import cz.itnetwork.exception.InvoiceNotFoundException;
 import cz.itnetwork.exception.PersonNotFoundException;
 import cz.itnetwork.utils.FilterUtils;
 import cz.itnetwork.utils.PaginationUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +30,7 @@ public class InvoiceServiceImpl extends BaseService<InvoiceEntity, Long> impleme
     private final InvoiceMapper invoiceMapper;
     private final PersonRepository personRepository;
 
+    @Autowired
     public InvoiceServiceImpl(InvoiceRepository invoiceRepository,
                               InvoiceMapper invoiceMapper,
                               PersonRepository personRepository) {
