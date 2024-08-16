@@ -3,11 +3,11 @@ package cz.itnetwork.controller;
 import cz.itnetwork.dto.InvoiceDTO;
 import cz.itnetwork.dto.PaginatedResponse;
 import cz.itnetwork.dto.PersonDTO;
-import cz.itnetwork.dto.PersonStatisticsDTO;
 import cz.itnetwork.service.PersonService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -71,10 +71,10 @@ public class PersonController {
     }
 
     @GetMapping("/statistics")
-    public PaginatedResponse<PersonStatisticsDTO> getPersonStatistics(
+    public ResponseEntity<Map<String, Object>> getPersonStatistics(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int limit,
             @RequestParam(defaultValue = "personName,asc") String sort) {
-        return personService.getPersonStatistics(page, limit, sort);
+        return ResponseEntity.ok(personService.getPersonStatistics(page, limit, sort));
     }
 }

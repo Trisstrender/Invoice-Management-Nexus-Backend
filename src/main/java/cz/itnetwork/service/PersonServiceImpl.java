@@ -99,62 +99,67 @@ public class PersonServiceImpl extends BaseService<PersonEntity, Long> implement
     }
 
     @Override
-    public PaginatedResponse<PersonStatisticsDTO> getPersonStatistics(int page, int limit, String sort) {
-        // Default sort field and direction
-        String sortField = "id";
-        Sort.Direction sortDirection = Sort.Direction.ASC;
-
-        // Parse and validate sort parameters
-        if (sort != null && !sort.isEmpty()) {
-            String[] sortParams = sort.split(",");
-            String requestedSortField = sortParams[0].trim();
-            sortDirection = sortParams.length > 1 && sortParams[1].trim().equalsIgnoreCase("desc")
-                    ? Sort.Direction.DESC : Sort.Direction.ASC;
-
-            Set<String> validSortFields = Set.of("id", "name", "revenue");
-            if (validSortFields.contains(requestedSortField)) {
-                sortField = requestedSortField;
-            }
-        }
-
-        // Fetch all persons
+    public Map<String, Object> getPersonStatistics(int page, int limit, String sort) {
         List<PersonEntity> allPersons = personRepository.findAll();
 
-        // Map to DTOs and filter
+        // Create PersonStatisticsDTO list
         List<PersonStatisticsDTO> statistics = allPersons.stream()
                 .map(person -> {
                     long revenue = person.getSales().stream().mapToLong(InvoiceEntity::getPrice).sum();
                     return new PersonStatisticsDTO(person.getId(), person.getName(), revenue);
                 })
-                .filter(stat -> stat.getRevenue() > 0)  // Filter out people with zero revenue
+                .filter(stat -> stat.getRevenue() > 0)
                 .collect(Collectors.toList());
 
-        // Sort the filtered list using Comparator
-        Comparator<PersonStatisticsDTO> comparator = switch (sortField) {
-            case "name" -> Comparator.comparing(PersonStatisticsDTO::getPersonName, String.CASE_INSENSITIVE_ORDER);
-            case "revenue" -> Comparator.comparingLong(PersonStatisticsDTO::getRevenue);
-            case "id" -> Comparator.comparingLong(PersonStatisticsDTO::getPersonId);
-            default -> throw new IllegalStateException("Unexpected value: " + sortField);
-        };
-        if (sortDirection == Sort.Direction.DESC) {
-            comparator = comparator.reversed();
-        }
-        statistics.sort(comparator);
+        // Get top 5 by revenue
+        List<PersonStatisticsDTO> top5ByRevenue = statistics.stream()
+                .sorted(Comparator.comparingLong(PersonStatisticsDTO::getRevenue).reversed())
+                .limit(5)
+                .collect(Collectors.toList());
 
-        // Apply pagination safely
+        // Sort the full list
+        sortStatistics(statistics, sort);
+
+        // Apply pagination
         int totalItems = statistics.size();
-        int start = Math.max(0, (page - 1) * limit);
+        int start = (page - 1) * limit;
         int end = Math.min(start + limit, totalItems);
-
-        List<PersonStatisticsDTO> paginatedStatistics = start < end ? statistics.subList(start, end) : Collections.emptyList();
+        List<PersonStatisticsDTO> paginatedStatistics = start < end
+                ? statistics.subList(start, end)
+                : Collections.emptyList();
 
         int totalPages = (int) Math.ceil((double) totalItems / limit);
 
-        return new PaginatedResponse<>(
+        PaginatedResponse<PersonStatisticsDTO> paginatedResponse = new PaginatedResponse<>(
                 paginatedStatistics,
                 page,
                 totalPages,
                 totalItems
         );
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("paginatedData", paginatedResponse);
+        result.put("top5ByRevenue", top5ByRevenue);
+
+        return result;
+    }
+
+    private void sortStatistics(List<PersonStatisticsDTO> statistics, String sort) {
+        String[] sortParams = sort.split(",");
+        String sortField = sortParams[0].trim();
+        boolean isAsc = sortParams.length == 1 || sortParams[1].trim().equalsIgnoreCase("asc");
+
+        Comparator<PersonStatisticsDTO> comparator = switch (sortField) {
+            case "name" -> Comparator.comparing(PersonStatisticsDTO::getPersonName, String.CASE_INSENSITIVE_ORDER);
+            case "revenue" -> Comparator.comparingLong(PersonStatisticsDTO::getRevenue);
+            case "id" -> Comparator.comparingLong(PersonStatisticsDTO::getPersonId);
+            default -> throw new IllegalArgumentException("Invalid sort field: " + sortField);
+        };
+
+        if (!isAsc) {
+            comparator = comparator.reversed();
+        }
+
+        statistics.sort(comparator);
     }
 }
