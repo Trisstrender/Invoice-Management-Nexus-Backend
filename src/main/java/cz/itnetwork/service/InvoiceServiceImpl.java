@@ -23,6 +23,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Implementation of the InvoiceService interface.
+ * This class provides the business logic for managing invoices.
+ */
 @Service
 public class InvoiceServiceImpl extends BaseService<InvoiceEntity, Long> implements InvoiceService {
 
@@ -30,6 +34,13 @@ public class InvoiceServiceImpl extends BaseService<InvoiceEntity, Long> impleme
     private final InvoiceMapper invoiceMapper;
     private final PersonRepository personRepository;
 
+    /**
+     * Constructs a new InvoiceServiceImpl with the necessary dependencies.
+     *
+     * @param invoiceRepository the repository for invoice entities
+     * @param invoiceMapper the mapper for converting between InvoiceEntity and InvoiceDTO
+     * @param personRepository the repository for person entities
+     */
     @Autowired
     public InvoiceServiceImpl(InvoiceRepository invoiceRepository,
                               InvoiceMapper invoiceMapper,
@@ -40,6 +51,9 @@ public class InvoiceServiceImpl extends BaseService<InvoiceEntity, Long> impleme
         this.personRepository = personRepository;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public InvoiceDTO createInvoice(InvoiceDTO invoiceDTO) {
         InvoiceEntity entity = invoiceMapper.toEntity(invoiceDTO);
@@ -54,6 +68,9 @@ public class InvoiceServiceImpl extends BaseService<InvoiceEntity, Long> impleme
         return invoiceMapper.toDTO(entity);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public PaginatedResponse<InvoiceDTO> getInvoices(Map<String, String> params) {
         Pageable pageable = PaginationUtils.createPageable(params);
@@ -73,6 +90,9 @@ public class InvoiceServiceImpl extends BaseService<InvoiceEntity, Long> impleme
         );
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public InvoiceDTO getInvoiceById(long id) {
         InvoiceEntity entity = findById(id)
@@ -80,6 +100,9 @@ public class InvoiceServiceImpl extends BaseService<InvoiceEntity, Long> impleme
         return invoiceMapper.toDTO(entity);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public InvoiceDTO updateInvoice(long id, InvoiceDTO invoiceDTO) {
         InvoiceEntity existingInvoice = findById(id)
@@ -102,11 +125,17 @@ public class InvoiceServiceImpl extends BaseService<InvoiceEntity, Long> impleme
         return invoiceMapper.toDTO(existingInvoice);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void deleteInvoice(long id) {
         delete(id);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Map<String, Object> getInvoiceStatistics() {
         long currentYear = LocalDate.now().getYear();
@@ -131,6 +160,9 @@ public class InvoiceServiceImpl extends BaseService<InvoiceEntity, Long> impleme
         return statistics;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public PaginatedResponse<InvoiceDTO> getPersonSales(String identificationNumber, int page, int limit) {
         Pageable pageable = PageRequest.of(page - 1, limit);
@@ -148,6 +180,9 @@ public class InvoiceServiceImpl extends BaseService<InvoiceEntity, Long> impleme
         );
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public PaginatedResponse<InvoiceDTO> getPersonPurchases(String identificationNumber, int page, int limit) {
         Pageable pageable = PageRequest.of(page - 1, limit);

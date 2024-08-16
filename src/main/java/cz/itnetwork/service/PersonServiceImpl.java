@@ -16,6 +16,10 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Implementation of the PersonService interface.
+ * This class provides the business logic for managing persons.
+ */
 @Service
 public class PersonServiceImpl extends BaseService<PersonEntity, Long> implements PersonService {
 
@@ -23,6 +27,13 @@ public class PersonServiceImpl extends BaseService<PersonEntity, Long> implement
     private final PersonMapper personMapper;
     private final InvoiceService invoiceService;
 
+    /**
+     * Constructs a new PersonServiceImpl with the necessary dependencies.
+     *
+     * @param personRepository the repository for person entities
+     * @param personMapper the mapper for converting between PersonEntity and PersonDTO
+     * @param invoiceService the service for managing invoices
+     */
     @Autowired
     public PersonServiceImpl(PersonRepository personRepository,
                              PersonMapper personMapper,
@@ -33,6 +44,9 @@ public class PersonServiceImpl extends BaseService<PersonEntity, Long> implement
         this.invoiceService = invoiceService;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public PersonDTO addPerson(PersonDTO personDTO) {
         PersonEntity entity = personMapper.toEntity(personDTO);
@@ -40,6 +54,9 @@ public class PersonServiceImpl extends BaseService<PersonEntity, Long> implement
         return personMapper.toDTO(entity);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public PersonDTO getPersonById(long id) {
         PersonEntity personEntity = findById(id)
@@ -47,6 +64,9 @@ public class PersonServiceImpl extends BaseService<PersonEntity, Long> implement
         return personMapper.toDTO(personEntity);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public PersonDTO updatePerson(long id, PersonDTO personDTO) {
         PersonEntity existingPerson = findById(id)
@@ -61,6 +81,9 @@ public class PersonServiceImpl extends BaseService<PersonEntity, Long> implement
         return personMapper.toDTO(newPerson);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void removePerson(long id) {
         PersonEntity person = findById(id)
@@ -69,6 +92,9 @@ public class PersonServiceImpl extends BaseService<PersonEntity, Long> implement
         update(person);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public PaginatedResponse<PersonDTO> getPersons(Map<String, String> params) {
         Pageable pageable = PaginationUtils.createPageable(params);
@@ -88,39 +114,45 @@ public class PersonServiceImpl extends BaseService<PersonEntity, Long> implement
         );
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public PaginatedResponse<InvoiceDTO> getPersonSales(String identificationNumber, int page, int limit) {
         return invoiceService.getPersonSales(identificationNumber, page, limit);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public PaginatedResponse<InvoiceDTO> getPersonPurchases(String identificationNumber, int page, int limit) {
         return invoiceService.getPersonPurchases(identificationNumber, page, limit);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Map<String, Object> getPersonStatistics(int page, int limit, String sort) {
         List<PersonEntity> allPersons = personRepository.findAll();
 
-        // Create PersonStatisticsDTO list
         List<PersonStatisticsDTO> statistics = allPersons.stream()
-                .map(person -> {
-                    long revenue = person.getSales().stream().mapToLong(InvoiceEntity::getPrice).sum();
-                    return new PersonStatisticsDTO(person.getId(), person.getName(), revenue);
-                })
+                .map(person -> new PersonStatisticsDTO(
+                        person.getId(),
+                        person.getName(),
+                        person.getSales().stream().mapToLong(InvoiceEntity::getPrice).sum()
+                ))
                 .filter(stat -> stat.getRevenue() > 0)
                 .collect(Collectors.toList());
 
-        // Get top 5 by revenue
         List<PersonStatisticsDTO> top5ByRevenue = statistics.stream()
                 .sorted(Comparator.comparingLong(PersonStatisticsDTO::getRevenue).reversed())
                 .limit(5)
                 .collect(Collectors.toList());
 
-        // Sort the full list
         sortStatistics(statistics, sort);
 
-        // Apply pagination
         int totalItems = statistics.size();
         int start = (page - 1) * limit;
         int end = Math.min(start + limit, totalItems);
@@ -144,6 +176,12 @@ public class PersonServiceImpl extends BaseService<PersonEntity, Long> implement
         return result;
     }
 
+    /**
+     * Sorts the list of PersonStatisticsDTO based on the provided sort parameter.
+     *
+     * @param statistics the list of PersonStatisticsDTO to sort
+     * @param sort the sort parameter in the format "field,direction"
+     */
     private void sortStatistics(List<PersonStatisticsDTO> statistics, String sort) {
         String[] sortParams = sort.split(",");
         String sortField = sortParams[0].trim();

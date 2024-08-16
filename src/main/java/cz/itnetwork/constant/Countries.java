@@ -5,5 +5,9 @@ package cz.itnetwork.constant;
  * Currently supports CZECHIA and SLOVAKIA.
  */
 public enum Countries {
-    CZECHIA, SLOVAKIA
+    /** Represents the Czech Republic */
+    CZECHIA,
+
+    /** Represents Slovakia */
+    SLOVAKIA
 }

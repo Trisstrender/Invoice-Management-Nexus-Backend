@@ -9,72 +9,61 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Utility class for creating JPA Specifications to filter entities.
+ */
 public class FilterUtils {
 
+    /**
+     * Creates a Specification to filter Person entities based on provided parameters.
+     *
+     * @param params filter parameters (e.g., "name", "identificationNumber")
+     * @return a Specification for filtering Person entities
+     */
     public static Specification<PersonEntity> createPersonSpecification(Map<String, String> params) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if (params.containsKey("name")) {
-                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("name")),
-                        "%" + params.get("name").toLowerCase() + "%"));
-            }
-
-            if (params.containsKey("identificationNumber")) {
-                predicates.add(criteriaBuilder.like(root.get("identificationNumber"),
-                        "%" + params.get("identificationNumber") + "%"));
-            }
+            params.forEach((key, value) -> {
+                if ("name".equals(key)) {
+                    predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), "%" + value.toLowerCase() + "%"));
+                } else if ("identificationNumber".equals(key)) {
+                    predicates.add(criteriaBuilder.like(root.get("identificationNumber"), "%" + value + "%"));
+                }
+            });
 
             predicates.add(criteriaBuilder.equal(root.get("hidden"), false));
-
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
     }
 
+    /**
+     * Creates a Specification to filter Invoice entities based on provided parameters.
+     *
+     * @param params filter parameters (e.g., "buyerID", "sellerID", "product", "minPrice", "maxPrice")
+     * @return a Specification for filtering Invoice entities
+     */
     public static Specification<InvoiceEntity> createInvoiceSpecification(Map<String, String> params) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if (params.containsKey("buyerID") && params.get("buyerID") != null && !params.get("buyerID").isEmpty()) {
+            params.forEach((key, value) -> {
                 try {
-                    Long buyerId = Long.parseLong(params.get("buyerID"));
-                    predicates.add(criteriaBuilder.equal(root.get("buyer").get("id"), buyerId));
-                } catch (NumberFormatException e) {
-                    // Log the error and potentially skip adding this predicate
+                    if ("buyerID".equals(key) && !value.isEmpty()) {
+                        predicates.add(criteriaBuilder.equal(root.get("buyer").get("id"), Long.parseLong(value)));
+                    } else if ("sellerID".equals(key) && !value.isEmpty()) {
+                        predicates.add(criteriaBuilder.equal(root.get("seller").get("id"), Long.parseLong(value)));
+                    } else if ("product".equals(key) && !value.isEmpty()) {
+                        predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("product")), "%" + value.toLowerCase() + "%"));
+                    } else if ("minPrice".equals(key) && !value.isEmpty()) {
+                        predicates.add(criteriaBuilder.ge(root.get("price"), Long.parseLong(value)));
+                    } else if ("maxPrice".equals(key) && !value.isEmpty()) {
+                        predicates.add(criteriaBuilder.le(root.get("price"), Long.parseLong(value)));
+                    }
+                } catch (NumberFormatException ignored) {
+                    // Ignore invalid number format exceptions
                 }
-            }
-
-            if (params.containsKey("sellerID") && params.get("sellerID") != null && !params.get("sellerID").isEmpty()) {
-                try {
-                    Long sellerId = Long.parseLong(params.get("sellerID"));
-                    predicates.add(criteriaBuilder.equal(root.get("seller").get("id"), sellerId));
-                } catch (NumberFormatException e) {
-                    // Log the error and potentially skip adding this predicate
-                }
-            }
-
-            if (params.containsKey("product") && params.get("product") != null && !params.get("product").isEmpty()) {
-                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("product")),
-                        "%" + params.get("product").toLowerCase() + "%"));
-            }
-
-            if (params.containsKey("minPrice") && params.get("minPrice") != null && !params.get("minPrice").isEmpty()) {
-                try {
-                    Long minPrice = Long.parseLong(params.get("minPrice"));
-                    predicates.add(criteriaBuilder.ge(root.get("price"), minPrice));
-                } catch (NumberFormatException e) {
-                    // Log the error and potentially skip adding this predicate
-                }
-            }
-
-            if (params.containsKey("maxPrice") && params.get("maxPrice") != null && !params.get("maxPrice").isEmpty()) {
-                try {
-                    Long maxPrice = Long.parseLong(params.get("maxPrice"));
-                    predicates.add(criteriaBuilder.le(root.get("price"), maxPrice));
-                } catch (NumberFormatException e) {
-                    // Log the error and potentially skip adding this predicate
-                }
-            }
+            });
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
