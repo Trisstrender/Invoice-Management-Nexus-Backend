@@ -1,6 +1,9 @@
 package cz.itnetwork.service;
 
-import cz.itnetwork.dto.*;
+import cz.itnetwork.dto.InvoiceDTO;
+import cz.itnetwork.dto.PaginatedResponse;
+import cz.itnetwork.dto.PersonDTO;
+import cz.itnetwork.dto.PersonStatisticsDTO;
 import cz.itnetwork.dto.mapper.PersonMapper;
 import cz.itnetwork.entity.InvoiceEntity;
 import cz.itnetwork.entity.PersonEntity;
@@ -9,7 +12,8 @@ import cz.itnetwork.exception.PersonNotFoundException;
 import cz.itnetwork.utils.FilterUtils;
 import cz.itnetwork.utils.PaginationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -31,8 +35,8 @@ public class PersonServiceImpl extends BaseService<PersonEntity, Long> implement
      * Constructs a new PersonServiceImpl with the necessary dependencies.
      *
      * @param personRepository the repository for person entities
-     * @param personMapper the mapper for converting between PersonEntity and PersonDTO
-     * @param invoiceService the service for managing invoices
+     * @param personMapper     the mapper for converting between PersonEntity and PersonDTO
+     * @param invoiceService   the service for managing invoices
      */
     @Autowired
     public PersonServiceImpl(PersonRepository personRepository,
@@ -180,7 +184,7 @@ public class PersonServiceImpl extends BaseService<PersonEntity, Long> implement
      * Sorts the list of PersonStatisticsDTO based on the provided sort parameter.
      *
      * @param statistics the list of PersonStatisticsDTO to sort
-     * @param sort the sort parameter in the format "field,direction"
+     * @param sort       the sort parameter in the format "field,direction"
      */
     private void sortStatistics(List<PersonStatisticsDTO> statistics, String sort) {
         String[] sortParams = sort.split(",");

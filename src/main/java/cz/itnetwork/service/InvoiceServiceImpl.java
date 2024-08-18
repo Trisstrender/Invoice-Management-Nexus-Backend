@@ -38,8 +38,8 @@ public class InvoiceServiceImpl extends BaseService<InvoiceEntity, Long> impleme
      * Constructs a new InvoiceServiceImpl with the necessary dependencies.
      *
      * @param invoiceRepository the repository for invoice entities
-     * @param invoiceMapper the mapper for converting between InvoiceEntity and InvoiceDTO
-     * @param personRepository the repository for person entities
+     * @param invoiceMapper     the mapper for converting between InvoiceEntity and InvoiceDTO
+     * @param personRepository  the repository for person entities
      */
     @Autowired
     public InvoiceServiceImpl(InvoiceRepository invoiceRepository,

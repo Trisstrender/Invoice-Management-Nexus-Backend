@@ -30,7 +30,7 @@ public interface PersonService {
     /**
      * Updates an existing person.
      *
-     * @param id the ID of the person to update
+     * @param id        the ID of the person to update
      * @param personDTO the DTO containing the updated person data
      * @return the updated person DTO
      */
@@ -55,8 +55,8 @@ public interface PersonService {
      * Retrieves a paginated list of sales invoices for a specific person.
      *
      * @param identificationNumber the identification number of the person
-     * @param page the page number
-     * @param limit the number of items per page
+     * @param page                 the page number
+     * @param limit                the number of items per page
      * @return a paginated response containing invoice DTOs
      */
     PaginatedResponse<InvoiceDTO> getPersonSales(String identificationNumber, int page, int limit);
@@ -65,8 +65,8 @@ public interface PersonService {
      * Retrieves a paginated list of purchase invoices for a specific person.
      *
      * @param identificationNumber the identification number of the person
-     * @param page the page number
-     * @param limit the number of items per page
+     * @param page                 the page number
+     * @param limit                the number of items per page
      * @return a paginated response containing invoice DTOs
      */
     PaginatedResponse<InvoiceDTO> getPersonPurchases(String identificationNumber, int page, int limit);
@@ -74,9 +74,9 @@ public interface PersonService {
     /**
      * Retrieves person statistics.
      *
-     * @param page the page number
+     * @param page  the page number
      * @param limit the number of items per page
-     * @param sort the sorting criteria
+     * @param sort  the sorting criteria
      * @return a map containing various person statistics
      */
     Map<String, Object> getPersonStatistics(int page, int limit, String sort);

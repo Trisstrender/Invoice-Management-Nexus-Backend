@@ -12,7 +12,7 @@ import java.util.Optional;
  * Abstract base class for service implementations.
  * Provides common CRUD operations and specification-based querying.
  *
- * @param <T> the entity type
+ * @param <T>  the entity type
  * @param <ID> the type of the entity's identifier
  */
 public abstract class BaseService<T, ID> {
@@ -23,7 +23,7 @@ public abstract class BaseService<T, ID> {
     /**
      * Constructs a new BaseService with the given repository and specification executor.
      *
-     * @param repository the JPA repository
+     * @param repository            the JPA repository
      * @param specificationExecutor the JPA specification executor
      */
     public BaseService(JpaRepository<T, ID> repository, JpaSpecificationExecutor<T> specificationExecutor) {
@@ -73,7 +73,7 @@ public abstract class BaseService<T, ID> {
     /**
      * Finds all entities matching the given specification.
      *
-     * @param spec the specification to apply
+     * @param spec     the specification to apply
      * @param pageable the pagination information
      * @return a Page of entities matching the specification
      */

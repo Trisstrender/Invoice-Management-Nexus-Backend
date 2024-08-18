@@ -50,7 +50,7 @@ public class PersonController {
     /**
      * Updates an existing person.
      *
-     * @param personId The ID of the person to update
+     * @param personId  The ID of the person to update
      * @param personDTO The person data transfer object containing the updated person details
      * @return The updated person DTO
      */
@@ -74,9 +74,9 @@ public class PersonController {
      * Retrieves a paginated list of persons based on the provided parameters.
      *
      * @param params A map of query parameters for filtering and sorting
-     * @param sort The sort order (default: "id,asc")
-     * @param page The page number (default: 1)
-     * @param limit The number of items per page (default: 10)
+     * @param sort   The sort order (default: "id,asc")
+     * @param page   The page number (default: 1)
+     * @param limit  The number of items per page (default: 10)
      * @return A paginated response containing the list of person DTOs
      */
     @GetMapping
@@ -96,8 +96,8 @@ public class PersonController {
      * Retrieves a paginated list of sales invoices for a specific person.
      *
      * @param identificationNumber The identification number of the person
-     * @param page The page number (default: 1)
-     * @param limit The number of items per page (default: 10)
+     * @param page                 The page number (default: 1)
+     * @param limit                The number of items per page (default: 10)
      * @return A paginated response containing the list of sales invoice DTOs
      */
     @GetMapping("/identification/{identificationNumber}/sales")
@@ -112,8 +112,8 @@ public class PersonController {
      * Retrieves a paginated list of purchase invoices for a specific person.
      *
      * @param identificationNumber The identification number of the person
-     * @param page The page number (default: 1)
-     * @param limit The number of items per page (default: 10)
+     * @param page                 The page number (default: 1)
+     * @param limit                The number of items per page (default: 10)
      * @return A paginated response containing the list of purchase invoice DTOs
      */
     @GetMapping("/identification/{identificationNumber}/purchases")
@@ -127,9 +127,9 @@ public class PersonController {
     /**
      * Retrieves person statistics.
      *
-     * @param page The page number (default: 1)
+     * @param page  The page number (default: 1)
      * @param limit The number of items per page (default: 10)
-     * @param sort The sort order (default: "personName,asc")
+     * @param sort  The sort order (default: "personName,asc")
      * @return A ResponseEntity containing a map of person statistics
      */
     @GetMapping("/statistics")

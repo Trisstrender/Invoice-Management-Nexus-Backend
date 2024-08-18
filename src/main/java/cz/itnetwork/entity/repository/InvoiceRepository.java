@@ -16,7 +16,7 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, Long>, J
      * Finds all invoices where the given identification number matches the seller's identification number.
      *
      * @param identificationNumber the identification number of the seller
-     * @param pageable pagination information
+     * @param pageable             pagination information
      * @return a Page of InvoiceEntity objects
      */
     Page<InvoiceEntity> findBySeller_IdentificationNumber(String identificationNumber, Pageable pageable);
@@ -25,7 +25,7 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, Long>, J
      * Finds all invoices where the given identification number matches the buyer's identification number.
      *
      * @param identificationNumber the identification number of the buyer
-     * @param pageable pagination information
+     * @param pageable             pagination information
      * @return a Page of InvoiceEntity objects
      */
     Page<InvoiceEntity> findByBuyer_IdentificationNumber(String identificationNumber, Pageable pageable);

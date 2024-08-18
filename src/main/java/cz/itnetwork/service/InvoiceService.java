@@ -29,7 +29,7 @@ public interface InvoiceService {
     /**
      * Updates an existing invoice.
      *
-     * @param id the ID of the invoice to update
+     * @param id         the ID of the invoice to update
      * @param invoiceDTO the DTO containing the updated invoice data
      * @return the updated invoice DTO
      */
@@ -61,8 +61,8 @@ public interface InvoiceService {
      * Retrieves a paginated list of sales invoices for a specific person.
      *
      * @param identificationNumber the identification number of the person
-     * @param page the page number
-     * @param limit the number of items per page
+     * @param page                 the page number
+     * @param limit                the number of items per page
      * @return a paginated response containing invoice DTOs
      */
     PaginatedResponse<InvoiceDTO> getPersonSales(String identificationNumber, int page, int limit);
@@ -71,8 +71,8 @@ public interface InvoiceService {
      * Retrieves a paginated list of purchase invoices for a specific person.
      *
      * @param identificationNumber the identification number of the person
-     * @param page the page number
-     * @param limit the number of items per page
+     * @param page                 the page number
+     * @param limit                the number of items per page
      * @return a paginated response containing invoice DTOs
      */
     PaginatedResponse<InvoiceDTO> getPersonPurchases(String identificationNumber, int page, int limit);

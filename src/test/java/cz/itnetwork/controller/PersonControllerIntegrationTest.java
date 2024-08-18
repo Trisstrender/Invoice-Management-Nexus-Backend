@@ -38,6 +38,24 @@ class PersonControllerIntegrationTest {
     @MockBean
     private PersonService personService;
 
+    private static Map<String, Object> getStringObjectMap() {
+        PersonStatisticsDTO stat1 = new PersonStatisticsDTO(1L, "Person 1", 1000L);
+        PersonStatisticsDTO stat2 = new PersonStatisticsDTO(2L, "Person 2", 2000L);
+        PersonStatisticsDTO stat3 = new PersonStatisticsDTO(3L, "Person 3", 3000L);
+
+        PaginatedResponse<PersonStatisticsDTO> paginatedResponse = new PaginatedResponse<>(
+                Arrays.asList(stat1, stat2),
+                1, 1, 2
+        );
+
+        List<PersonStatisticsDTO> top5ByRevenue = Arrays.asList(stat3, stat2, stat1);
+
+        Map<String, Object> mockResponse = new HashMap<>();
+        mockResponse.put("paginatedData", paginatedResponse);
+        mockResponse.put("top5ByRevenue", top5ByRevenue);
+        return mockResponse;
+    }
+
     @Test
     void addPerson_ValidPerson_ReturnsCreatedPerson() throws Exception {
         PersonDTO inputDTO = TestDataFactory.createValidPersonDTO();
@@ -196,23 +214,5 @@ class PersonControllerIntegrationTest {
                 .andExpect(jsonPath("$.top5ByRevenue[0].revenue").value(3000))
                 .andExpect(jsonPath("$.top5ByRevenue[1].personId").value(2))
                 .andExpect(jsonPath("$.top5ByRevenue[2].personId").value(1));
-    }
-
-    private static Map<String, Object> getStringObjectMap() {
-        PersonStatisticsDTO stat1 = new PersonStatisticsDTO(1L, "Person 1", 1000L);
-        PersonStatisticsDTO stat2 = new PersonStatisticsDTO(2L, "Person 2", 2000L);
-        PersonStatisticsDTO stat3 = new PersonStatisticsDTO(3L, "Person 3", 3000L);
-
-        PaginatedResponse<PersonStatisticsDTO> paginatedResponse = new PaginatedResponse<>(
-                Arrays.asList(stat1, stat2),
-                1, 1, 2
-        );
-
-        List<PersonStatisticsDTO> top5ByRevenue = Arrays.asList(stat3, stat2, stat1);
-
-        Map<String, Object> mockResponse = new HashMap<>();
-        mockResponse.put("paginatedData", paginatedResponse);
-        mockResponse.put("top5ByRevenue", top5ByRevenue);
-        return mockResponse;
     }
 }

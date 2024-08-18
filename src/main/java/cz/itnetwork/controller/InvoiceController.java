@@ -48,7 +48,7 @@ public class InvoiceController {
     /**
      * Updates an existing invoice.
      *
-     * @param invoiceId The ID of the invoice to update
+     * @param invoiceId  The ID of the invoice to update
      * @param invoiceDTO The invoice data transfer object containing the updated invoice details
      * @return The updated invoice DTO
      */
@@ -72,9 +72,9 @@ public class InvoiceController {
      * Retrieves a paginated list of invoices based on the provided parameters.
      *
      * @param params A map of query parameters for filtering and sorting
-     * @param sort The sort order (default: "id,asc")
-     * @param page The page number (default: 1)
-     * @param limit The number of items per page (default: 10)
+     * @param sort   The sort order (default: "id,asc")
+     * @param page   The page number (default: 1)
+     * @param limit  The number of items per page (default: 10)
      * @return A paginated response containing the list of invoice DTOs
      */
     @GetMapping
@@ -104,8 +104,8 @@ public class InvoiceController {
      * Retrieves a paginated list of sales invoices for a specific person.
      *
      * @param identificationNumber The identification number of the person
-     * @param page The page number (default: 1)
-     * @param limit The number of items per page (default: 10)
+     * @param page                 The page number (default: 1)
+     * @param limit                The number of items per page (default: 10)
      * @return A paginated response containing the list of sales invoice DTOs
      */
     @GetMapping("/identification/{identificationNumber}/sales")
@@ -120,8 +120,8 @@ public class InvoiceController {
      * Retrieves a paginated list of purchase invoices for a specific person.
      *
      * @param identificationNumber The identification number of the person
-     * @param page The page number (default: 1)
-     * @param limit The number of items per page (default: 10)
+     * @param page                 The page number (default: 1)
+     * @param limit                The number of items per page (default: 10)
      * @return A paginated response containing the list of purchase invoice DTOs
      */
     @GetMapping("/identification/{identificationNumber}/purchases")
