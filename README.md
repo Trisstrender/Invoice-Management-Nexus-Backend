@@ -102,4 +102,4 @@ This command will generate a JAR file in the `target` directory, ready for deplo
 
 ## Frontend Repository
 
-The frontend application that complements this backend can be found at [Invoice Management Nexus Frontend](https://github.com/your-username/invoice-management-nexus-frontend).
+The frontend application that complements this backend can be found at [Invoice Management Nexus Frontend](https://github.com/Trisstrender/invoice-management-nexus-frontend).
