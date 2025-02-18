@@ -1,7 +1,7 @@
 package com.invoice.management.service;
 
-import cz.itnetwork.dto.InvoiceDTO;
-import cz.itnetwork.dto.PaginatedResponse;
+import com.invoice.management.dto.InvoiceDTO;
+import com.invoice.management.dto.PaginatedResponse;
 
 import java.util.Map;
 

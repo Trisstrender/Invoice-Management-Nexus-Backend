@@ -1,8 +1,8 @@
 package com.invoice.management.utils;
 
-import cz.itnetwork.constant.Countries;
-import cz.itnetwork.dto.InvoiceDTO;
-import cz.itnetwork.dto.PersonDTO;
+import com.invoice.management.constant.Countries;
+import com.invoice.management.dto.InvoiceDTO;
+import com.invoice.management.dto.PersonDTO;
 
 import java.time.LocalDate;
 

@@ -1,15 +1,15 @@
 package com.invoice.management.service;
 
-import cz.itnetwork.dto.InvoiceDTO;
-import cz.itnetwork.dto.PaginatedResponse;
-import cz.itnetwork.dto.PersonDTO;
-import cz.itnetwork.dto.PersonStatisticsDTO;
-import cz.itnetwork.dto.mapper.PersonMapper;
-import cz.itnetwork.entity.InvoiceEntity;
-import cz.itnetwork.entity.PersonEntity;
-import cz.itnetwork.entity.repository.PersonRepository;
-import cz.itnetwork.exception.PersonNotFoundException;
-import cz.itnetwork.utils.TestDataFactory;
+import com.invoice.management.dto.InvoiceDTO;
+import com.invoice.management.dto.PaginatedResponse;
+import com.invoice.management.dto.PersonDTO;
+import com.invoice.management.dto.PersonStatisticsDTO;
+import com.invoice.management.dto.mapper.PersonMapper;
+import com.invoice.management.entity.InvoiceEntity;
+import com.invoice.management.entity.PersonEntity;
+import com.invoice.management.entity.repository.PersonRepository;
+import com.invoice.management.exception.PersonNotFoundException;
+import com.invoice.management.utils.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

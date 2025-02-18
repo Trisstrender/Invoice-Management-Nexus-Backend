@@ -1,10 +1,10 @@
 package com.invoice.management.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cz.itnetwork.dto.InvoiceDTO;
-import cz.itnetwork.dto.PaginatedResponse;
-import cz.itnetwork.service.InvoiceService;
-import cz.itnetwork.utils.TestDataFactory;
+import com.invoice.management.dto.InvoiceDTO;
+import com.invoice.management.dto.PaginatedResponse;
+import com.invoice.management.service.InvoiceService;
+import com.invoice.management.utils.TestDataFactory;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

@@ -9,7 +9,7 @@
         <version>3.0.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>cz.itnetwork</groupId>
+    <groupId>com.invoice.management</groupId>
     <artifactId>SpringInvoiceDatabase</artifactId>
     <version>1.0-SNAPSHOT</version>
 
@@ -22,7 +22,7 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.20</version>
+            <version>8.0.28</version>
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>

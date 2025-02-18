@@ -1,8 +1,8 @@
 package com.invoice.management.service;
 
-import cz.itnetwork.dto.InvoiceDTO;
-import cz.itnetwork.dto.PaginatedResponse;
-import cz.itnetwork.dto.PersonDTO;
+import com.invoice.management.dto.InvoiceDTO;
+import com.invoice.management.dto.PaginatedResponse;
+import com.invoice.management.dto.PersonDTO;
 
 import java.util.Map;
 

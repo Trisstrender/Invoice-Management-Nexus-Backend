@@ -1,7 +1,7 @@
 package com.invoice.management.dto.mapper;
 
-import cz.itnetwork.dto.PersonDTO;
-import cz.itnetwork.entity.PersonEntity;
+import com.invoice.management.dto.PersonDTO;
+import com.invoice.management.entity.PersonEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
